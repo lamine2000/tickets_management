@@ -63,4 +63,12 @@ public interface ClientService {
      * @param id the id of the entity.
      */
     void delete(Long id);
+
+    /**
+     * Get the "login" client.
+     *
+     * @param login the login of the user.
+     * @return the entity.
+     */
+    Optional<ClientDTO> findByUser_Login(String login);
 }

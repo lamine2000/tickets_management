@@ -85,4 +85,13 @@ public class ClientServiceImpl implements ClientService {
         log.debug("Request to delete Client : {}", id);
         clientRepository.deleteById(id);
     }
+
+    @Override
+    public Optional<ClientDTO> findByUser_Login(String login) {
+        log.debug("Request the Client associated with user : {}", login);
+        Optional<Client> optionalClient = clientRepository.findByUser_Login(login);
+
+        if (optionalClient.isEmpty()) return Optional.empty();
+        return Optional.of(clientMapper.toDto(optionalClient.get()));
+    }
 }

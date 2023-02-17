@@ -37,4 +37,6 @@ public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecif
 
     @Query("select client from Client client left join fetch client.user where client.id =:id")
     Optional<Client> findOneWithToOneRelationships(@Param("id") Long id);
+
+    Optional<Client> findByUser_Login(String login);
 }

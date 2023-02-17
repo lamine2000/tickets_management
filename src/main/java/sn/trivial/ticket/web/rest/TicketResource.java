@@ -200,4 +200,17 @@ public class TicketResource {
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
     }
+
+    /* Custom */
+    /**
+     * {@code GET  /tickets/clients/} : get all the tickets of the current client.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/clients/")
+    public ResponseEntity<List<TicketDTO>> getTicketsOfConnectedClient() {
+        log.debug("REST request to get tickets of connected Client");
+        List<TicketDTO> ticketList = ticketService.findTicketsOfConnectedClient();
+        return ResponseEntity.ok().body(ticketList);
+    }
 }
