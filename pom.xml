@@ -8,7 +8,7 @@
     <groupId>sn.trivial.ticket</groupId>
     <artifactId>tickets-management</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <name>Tickets Management</name>
     <description>Description for tickets_management</description>
 
