@@ -44,7 +44,7 @@ relationship OneToOne {
 
 relationship ManyToOne {
   Ticket {issuedBy} to Client
-  Ticket {assignedTo} to Client
+  Ticket {assignedTo} to Agent
   Message {ticket} to Ticket
 }
 
