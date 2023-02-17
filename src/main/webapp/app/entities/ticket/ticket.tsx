@@ -142,7 +142,7 @@ export const Ticket = () => {
                   <td>{ticket.issueDescription}</td>
                   <td>{ticket.issuedAt ? <TextFormat type="date" value={ticket.issuedAt} format={APP_DATE_FORMAT} /> : null}</td>
                   <td>{ticket.issuedBy ? <Link to={`/client/${ticket.issuedBy.id}`}>{ticket.issuedBy.id}</Link> : ''}</td>
-                  <td>{ticket.assignedTo ? <Link to={`/client/${ticket.assignedTo.id}`}>{ticket.assignedTo.id}</Link> : ''}</td>
+                  <td>{ticket.assignedTo ? <Link to={`/agent/${ticket.assignedTo.id}`}>{ticket.assignedTo.id}</Link> : ''}</td>
                   <td className="text-end">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`/ticket/${ticket.id}`} color="info" size="sm" data-cy="entityDetailsButton">

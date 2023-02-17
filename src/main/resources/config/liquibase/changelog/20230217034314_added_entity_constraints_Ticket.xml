@@ -18,6 +18,6 @@
                                  baseTableName="ticket"
                                  constraintName="fk_ticket__assigned_to_id"
                                  referencedColumnNames="id"
-                                 referencedTableName="client"/>
+                                 referencedTableName="agent"/>
     </changeSet>
 </databaseChangeLog>

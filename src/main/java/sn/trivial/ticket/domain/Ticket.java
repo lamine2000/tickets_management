@@ -46,7 +46,7 @@ public class Ticket implements Serializable {
 
     @ManyToOne
     @JsonIgnoreProperties(value = { "user" }, allowSetters = true)
-    private Client assignedTo;
+    private Agent assignedTo;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -128,16 +128,16 @@ public class Ticket implements Serializable {
         return this;
     }
 
-    public Client getAssignedTo() {
+    public Agent getAssignedTo() {
         return this.assignedTo;
     }
 
-    public void setAssignedTo(Client client) {
-        this.assignedTo = client;
+    public void setAssignedTo(Agent agent) {
+        this.assignedTo = agent;
     }
 
-    public Ticket assignedTo(Client client) {
-        this.setAssignedTo(client);
+    public Ticket assignedTo(Agent agent) {
+        this.setAssignedTo(agent);
         return this;
     }
 

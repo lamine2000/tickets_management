@@ -28,7 +28,7 @@ public class TicketDTO implements Serializable {
 
     private ClientDTO issuedBy;
 
-    private ClientDTO assignedTo;
+    private AgentDTO assignedTo;
 
     public Long getId() {
         return id;
@@ -78,11 +78,11 @@ public class TicketDTO implements Serializable {
         this.issuedBy = issuedBy;
     }
 
-    public ClientDTO getAssignedTo() {
+    public AgentDTO getAssignedTo() {
         return assignedTo;
     }
 
-    public void setAssignedTo(ClientDTO assignedTo) {
+    public void setAssignedTo(AgentDTO assignedTo) {
         this.assignedTo = assignedTo;
     }
 

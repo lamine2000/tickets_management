@@ -10,6 +10,8 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 
 import { IClient } from 'app/shared/model/client.model';
 import { getEntities as getClients } from 'app/entities/client/client.reducer';
+import { IAgent } from 'app/shared/model/agent.model';
+import { getEntities as getAgents } from 'app/entities/agent/agent.reducer';
 import { ITicket } from 'app/shared/model/ticket.model';
 import { TicketStatus } from 'app/shared/model/enumerations/ticket-status.model';
 import { getEntity, updateEntity, createEntity, reset } from './ticket.reducer';
@@ -23,6 +25,7 @@ export const TicketUpdate = () => {
   const isNew = id === undefined;
 
   const clients = useAppSelector(state => state.client.entities);
+  const agents = useAppSelector(state => state.agent.entities);
   const ticketEntity = useAppSelector(state => state.ticket.entity);
   const loading = useAppSelector(state => state.ticket.loading);
   const updating = useAppSelector(state => state.ticket.updating);
@@ -41,6 +44,7 @@ export const TicketUpdate = () => {
     }
 
     dispatch(getClients({}));
+    dispatch(getAgents({}));
   }, []);
 
   useEffect(() => {
@@ -56,7 +60,7 @@ export const TicketUpdate = () => {
       ...ticketEntity,
       ...values,
       issuedBy: clients.find(it => it.id.toString() === values.issuedBy.toString()),
-      assignedTo: clients.find(it => it.id.toString() === values.assignedTo.toString()),
+      assignedTo: agents.find(it => it.id.toString() === values.assignedTo.toString()),
     };
 
     if (isNew) {
@@ -172,8 +176,8 @@ export const TicketUpdate = () => {
                 type="select"
               >
                 <option value="" key="0" />
-                {clients
-                  ? clients.map(otherEntity => (
+                {agents
+                  ? agents.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
                         {otherEntity.id}
                       </option>

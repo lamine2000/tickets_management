@@ -20,6 +20,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import sn.trivial.ticket.IntegrationTest;
+import sn.trivial.ticket.domain.Agent;
 import sn.trivial.ticket.domain.Client;
 import sn.trivial.ticket.domain.Ticket;
 import sn.trivial.ticket.domain.enumeration.TicketStatus;
@@ -502,12 +503,12 @@ class TicketResourceIT {
     @Test
     @Transactional
     void getAllTicketsByAssignedToIsEqualToSomething() throws Exception {
-        Client assignedTo;
-        if (TestUtil.findAll(em, Client.class).isEmpty()) {
+        Agent assignedTo;
+        if (TestUtil.findAll(em, Agent.class).isEmpty()) {
             ticketRepository.saveAndFlush(ticket);
-            assignedTo = ClientResourceIT.createEntity(em);
+            assignedTo = AgentResourceIT.createEntity(em);
         } else {
-            assignedTo = TestUtil.findAll(em, Client.class).get(0);
+            assignedTo = TestUtil.findAll(em, Agent.class).get(0);
         }
         em.persist(assignedTo);
         em.flush();

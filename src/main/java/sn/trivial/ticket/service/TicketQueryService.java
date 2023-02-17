@@ -111,7 +111,7 @@ public class TicketQueryService extends QueryService<Ticket> {
             if (criteria.getAssignedToId() != null) {
                 specification =
                     specification.and(
-                        buildSpecification(criteria.getAssignedToId(), root -> root.join(Ticket_.assignedTo, JoinType.LEFT).get(Client_.id))
+                        buildSpecification(criteria.getAssignedToId(), root -> root.join(Ticket_.assignedTo, JoinType.LEFT).get(Agent_.id))
                     );
             }
         }

@@ -1,0 +1,4 @@
+src/main/java/sn/trivial/ticket/repository/ClientRepository.java skip
+src/main/java/sn/trivial/ticket/service/impl/TicketServiceImpl.java skip
+src/main/java/sn/trivial/ticket/service/ClientService.java skip
+src/main/java/sn/trivial/ticket/service/impl/ClientServiceImpl.java skip

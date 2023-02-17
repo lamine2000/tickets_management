@@ -39,7 +39,7 @@
       "relationshipType": "many-to-one"
     },
     {
-      "otherEntityName": "client",
+      "otherEntityName": "agent",
       "relationshipName": "assignedTo",
       "relationshipType": "many-to-one"
     }
