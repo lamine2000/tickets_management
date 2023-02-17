@@ -1,0 +1,59 @@
+
+
+entity Ticket {
+	code String unique required
+	status TicketStatus required
+    issueDescription String required
+    issuedAt Instant required
+}
+
+entity Client {
+	firstName String required
+    lastName String required
+    email String required
+}
+
+entity Agent {
+	firstName String required
+    lastName String required
+    email String required
+}
+
+entity Message {
+	content TextBlob required
+}
+
+enum TicketStatus {
+	RECEIVED,
+    BEING_TREATED,
+    PENDING,
+    DO_NOT_TREAT,
+    TREATED,
+    CLOSED
+}
+
+enum VendorStatus {
+	ACTIVE,
+    INACTIVE
+}
+
+relationship OneToOne {
+  Client {User(login)} to User
+  Agent {User(login)} to User
+}
+
+relationship ManyToOne {
+  Ticket {issuedBy} to Client
+  Ticket {assignedTo} to Client
+  Message {ticket} to Ticket
+}
+
+paginate * with pagination
+dto * with mapstruct
+service * with serviceImpl
+search * with elasticsearch
+
+filter Ticket
+filter Client
+filter Agent
+filter Message

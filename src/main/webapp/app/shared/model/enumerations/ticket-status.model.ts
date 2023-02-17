@@ -1,0 +1,13 @@
+export enum TicketStatus {
+  RECEIVED = 'RECEIVED',
+
+  BEING_TREATED = 'BEING_TREATED',
+
+  PENDING = 'PENDING',
+
+  DO_NOT_TREAT = 'DO_NOT_TREAT',
+
+  TREATED = 'TREATED',
+
+  CLOSED = 'CLOSED',
+}
