@@ -3,6 +3,7 @@ package sn.trivial.ticket.service.impl;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -11,16 +12,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sn.trivial.ticket.domain.Authority;
 import sn.trivial.ticket.domain.Ticket;
 import sn.trivial.ticket.domain.User;
 import sn.trivial.ticket.domain.enumeration.TicketStatus;
 import sn.trivial.ticket.repository.TicketRepository;
+import sn.trivial.ticket.security.AuthoritiesConstants;
 import sn.trivial.ticket.service.AgentService;
 import sn.trivial.ticket.service.ClientService;
 import sn.trivial.ticket.service.TicketService;
 import sn.trivial.ticket.service.UserService;
+import sn.trivial.ticket.service.dto.AdminUserDTO;
+import sn.trivial.ticket.service.dto.AgentDTO;
 import sn.trivial.ticket.service.dto.TicketDTO;
+import sn.trivial.ticket.service.dto.UserDTO;
 import sn.trivial.ticket.service.mapper.TicketMapper;
+import sn.trivial.ticket.service.mapper.UserMapper;
 
 /**
  * Service Implementation for managing {@link Ticket}.
@@ -41,18 +48,22 @@ public class TicketServiceImpl implements TicketService {
 
     private final AgentService agentService;
 
+    private final UserMapper userMapper;
+
     public TicketServiceImpl(
         TicketRepository ticketRepository,
         TicketMapper ticketMapper,
         UserService userService,
         ClientService clientService,
-        AgentService agentService
+        AgentService agentService,
+        UserMapper userMapper
     ) {
         this.ticketRepository = ticketRepository;
         this.ticketMapper = ticketMapper;
         this.userService = userService;
         this.clientService = clientService;
         this.agentService = agentService;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -126,8 +137,23 @@ public class TicketServiceImpl implements TicketService {
         ticketDTO.setIssuedAt(Instant.now());
         ticketDTO.setCode(String.format("T-%s-%s", user.getId(), UUID.randomUUID()));
         ticketDTO.setStatus(TicketStatus.RECEIVED);
+
         //the "no_agent" agent should always exist
-        ticketDTO.setAssignedTo(agentService.findByUser_Login("no_agent").get());
+        Optional<AgentDTO> noAgent = agentService.findByUser_Login("no_agent");
+        if (noAgent.isEmpty()) {
+            AdminUserDTO adminUserDTO = new AdminUserDTO();
+            adminUserDTO.setLogin("no_agent");
+            adminUserDTO.setAuthorities(Set.of(AuthoritiesConstants.USER, AuthoritiesConstants.AGENT));
+            adminUserDTO.setLangKey("en");
+            adminUserDTO.setActivated(true);
+
+            AgentDTO na = new AgentDTO();
+            User newUser = userService.registerUser(adminUserDTO, UUID.randomUUID().toString());
+            na.setUser(userMapper.toDtoLogin(newUser));
+            noAgent = Optional.of(agentService.save(na));
+        }
+
+        ticketDTO.setAssignedTo(noAgent.get());
 
         Ticket ticket = ticketMapper.toEntity(ticketDTO);
         ticket = ticketRepository.save(ticket);
