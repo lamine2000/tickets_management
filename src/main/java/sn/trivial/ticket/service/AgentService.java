@@ -63,4 +63,12 @@ public interface AgentService {
      * @param id the id of the entity.
      */
     void delete(Long id);
+
+    /**
+     * Get the "login" agent.
+     *
+     * @param login the login of the entity's user.
+     * @return the entity.
+     */
+    Optional<AgentDTO> findByUser_Login(String login);
 }

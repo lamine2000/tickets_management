@@ -85,4 +85,10 @@ public class AgentServiceImpl implements AgentService {
         log.debug("Request to delete Agent : {}", id);
         agentRepository.deleteById(id);
     }
+
+    @Override
+    public Optional<AgentDTO> findByUser_Login(String login) {
+        log.debug("Request to get Agent of login: {}", login);
+        return agentRepository.findByUser_Login(login).map(agentMapper::toDto);
+    }
 }

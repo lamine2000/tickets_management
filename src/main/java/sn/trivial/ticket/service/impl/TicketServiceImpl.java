@@ -1,7 +1,9 @@
 package sn.trivial.ticket.service.impl;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,11 +11,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sn.trivial.ticket.domain.Authority;
 import sn.trivial.ticket.domain.Ticket;
 import sn.trivial.ticket.domain.User;
+import sn.trivial.ticket.domain.enumeration.TicketStatus;
 import sn.trivial.ticket.repository.TicketRepository;
-import sn.trivial.ticket.security.AuthoritiesConstants;
+import sn.trivial.ticket.service.AgentService;
 import sn.trivial.ticket.service.ClientService;
 import sn.trivial.ticket.service.TicketService;
 import sn.trivial.ticket.service.UserService;
@@ -37,16 +39,20 @@ public class TicketServiceImpl implements TicketService {
 
     private final ClientService clientService;
 
+    private final AgentService agentService;
+
     public TicketServiceImpl(
         TicketRepository ticketRepository,
         TicketMapper ticketMapper,
         UserService userService,
-        ClientService clientService
+        ClientService clientService,
+        AgentService agentService
     ) {
         this.ticketRepository = ticketRepository;
         this.ticketMapper = ticketMapper;
         this.userService = userService;
         this.clientService = clientService;
+        this.agentService = agentService;
     }
 
     @Override
@@ -105,19 +111,26 @@ public class TicketServiceImpl implements TicketService {
         log.debug("Request to get tickets of connected Client");
         User user = userService.getUserWithAuthorities().get();
 
-        if (
-            user
-                .getAuthorities()
-                .stream()
-                .map(Authority::getName)
-                .noneMatch(authorityName -> authorityName.equals(AuthoritiesConstants.CLIENT))
-        ) {
-            log.error("User {} is not a Client", user.getLogin());
-            return List.of();
-        }
-
         Long clientId = clientService.findByUser_Login(user.getLogin()).get().getId();
 
         return ticketRepository.findByIssuedBy_Id(clientId).stream().map(ticketMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public TicketDTO saveWithConnectedClient(TicketDTO ticketDTO) {
+        log.debug("Request to save Ticket created by the currently connected Client: {}", ticketDTO);
+
+        User user = userService.getUserWithAuthorities().get();
+
+        ticketDTO.setIssuedBy(clientService.findByUser_Login(user.getLogin()).get());
+        ticketDTO.setIssuedAt(Instant.now());
+        ticketDTO.setCode(String.format("T-%s-%s", user.getId(), UUID.randomUUID()));
+        ticketDTO.setStatus(TicketStatus.RECEIVED);
+        //the "no_agent" agent should always exist
+        ticketDTO.setAssignedTo(agentService.findByUser_Login("no_agent").get());
+
+        Ticket ticket = ticketMapper.toEntity(ticketDTO);
+        ticket = ticketRepository.save(ticket);
+        return ticketMapper.toDto(ticket);
     }
 }

@@ -207,10 +207,30 @@ public class TicketResource {
      *
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
      */
-    @GetMapping("/tickets/clients/")
+    @GetMapping("/tickets/clients")
     public ResponseEntity<List<TicketDTO>> getTicketsOfConnectedClient() {
         log.debug("REST request to get tickets of connected Client");
         List<TicketDTO> ticketList = ticketService.findTicketsOfConnectedClient();
         return ResponseEntity.ok().body(ticketList);
+    }
+
+    /**
+     * {@code POST  /tickets/clients} : Create a new ticket by the connected Client.
+     *
+     * @param ticketDTO the ticketDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new ticketDTO, or with status {@code 400 (Bad Request)} if the ticket has already an ID.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PostMapping("/tickets/clients")
+    public ResponseEntity<TicketDTO> createTicketWithConnectedClient(@Valid @RequestBody TicketDTO ticketDTO) throws URISyntaxException {
+        log.debug("REST request to save Ticket : {}", ticketDTO);
+        if (ticketDTO.getId() != null) {
+            throw new BadRequestAlertException("A new ticket cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        TicketDTO result = ticketService.saveWithConnectedClient(ticketDTO);
+        return ResponseEntity
+            .created(new URI("/api/tickets/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
     }
 }

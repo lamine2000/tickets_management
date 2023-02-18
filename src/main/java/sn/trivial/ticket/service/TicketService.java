@@ -63,4 +63,12 @@ public interface TicketService {
      * @return the list of entities.
      */
     List<TicketDTO> findTicketsOfConnectedClient();
+
+    /**
+     * Save a ticket issued by the currently connected Client.
+     *
+     * @param ticketDTO the entity to save.
+     * @return the persisted entity.
+     */
+    TicketDTO saveWithConnectedClient(TicketDTO ticketDTO);
 }
