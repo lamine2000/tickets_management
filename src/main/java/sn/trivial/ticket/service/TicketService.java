@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sn.trivial.ticket.service.dto.TicketDTO;
+import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
 
 /**
  * Service Interface for managing {@link sn.trivial.ticket.domain.Ticket}.
@@ -79,4 +80,12 @@ public interface TicketService {
      * @return the entity.
      */
     Optional<TicketDTO> findOneTicketOfConnectedClient(Long ticketId);
+
+    /**
+     * Updates the status of a ticket that has been created by the connected client.
+     *
+     * @param changeTicketStatusVM the view model representing a ticket and the new Status.
+     * @return the persisted entity.
+     */
+    TicketDTO changeTicketStatusByClient(ChangeTicketStatusVM changeTicketStatusVM);
 }

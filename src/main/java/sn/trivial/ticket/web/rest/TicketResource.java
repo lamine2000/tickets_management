@@ -22,6 +22,7 @@ import sn.trivial.ticket.service.TicketService;
 import sn.trivial.ticket.service.criteria.TicketCriteria;
 import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
+import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -245,4 +246,29 @@ public class TicketResource {
         Optional<TicketDTO> ticketDTO = ticketService.findOneTicketOfConnectedClient(id);
         return ResponseUtil.wrapOrNotFound(ticketDTO);
     }
+
+    /**
+     * {@code POST  /tickets/change-status} : Change the status of a ticket.
+     *
+     * @param changeTicketStatusVM the ticketDTO to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new ticketDTO, or with status {@code 400 (Bad Request)} if the ticket has already an ID.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PostMapping("/tickets/change-status")
+    public ResponseEntity<TicketDTO> changeTicketStatus(@Valid @RequestBody ChangeTicketStatusVM changeTicketStatusVM)
+        throws URISyntaxException {
+        log.debug(
+            "REST request to change the status of a ticket of the connected Client. " + "Ticket id and new ticket status : {}",
+            changeTicketStatusVM
+        );
+        if (changeTicketStatusVM.getTicketId() == null || changeTicketStatusVM.getTicketStatus() == null) {
+            throw new BadRequestAlertException("The ticket's id and new ticket status are both required", ENTITY_NAME, "requiredfield");
+        }
+        TicketDTO result = ticketService.changeTicketStatusByClient(changeTicketStatusVM);
+        return ResponseEntity
+            .created(new URI("/tickets/change-status" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+    //TODO: secure and test the /tickets/change-status endpoint
 }

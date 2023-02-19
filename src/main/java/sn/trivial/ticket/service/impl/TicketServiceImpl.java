@@ -1,10 +1,7 @@
 package sn.trivial.ticket.service.impl;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +27,7 @@ import sn.trivial.ticket.service.dto.UserDTO;
 import sn.trivial.ticket.service.mapper.TicketMapper;
 import sn.trivial.ticket.service.mapper.UserMapper;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
+import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
 
 /**
  * Service Implementation for managing {@link Ticket}.
@@ -165,6 +163,7 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public Optional<TicketDTO> findOneTicketOfConnectedClient(Long ticketId) {
         log.debug("Request to get Ticket : {} if created by connected Client", ticketId);
+
         Optional<TicketDTO> optionalTicketDTO = this.findOne(ticketId);
         if (optionalTicketDTO.isEmpty()) return optionalTicketDTO;
 
@@ -174,5 +173,58 @@ public class TicketServiceImpl implements TicketService {
         Long ticketOwnerUserId = clientService.findOne(ticketOwnerClientId).get().getUser().getId();
 
         return connectedUserId.equals(ticketOwnerUserId) ? optionalTicketDTO : Optional.empty();
+    }
+
+    @Override
+    public TicketDTO changeTicketStatusByClient(ChangeTicketStatusVM changeTicketStatusVM) {
+        log.debug(
+            "Request to update the TicketStatus to {} of the Ticket {}" + " if created by the conected Client.",
+            changeTicketStatusVM.getTicketStatus(),
+            changeTicketStatusVM.getTicketId()
+        );
+
+        //check if the ticket exists
+        Long ticketId = changeTicketStatusVM.getTicketId();
+        Optional<TicketDTO> optionalTicketDTO = this.findOne(ticketId);
+        if (optionalTicketDTO.isEmpty()) throw new BadRequestAlertException(
+            String.format("Cannot change status of non-existant Ticket: %d", ticketId),
+            "ticket",
+            "ticketnotfound"
+        );
+
+        //check if the transition is allowed
+        TicketStatus oldStatus = optionalTicketDTO.get().getStatus();
+        TicketStatus newStatus = changeTicketStatusVM.getTicketStatus();
+
+        Map allowedTransitions = new HashMap<TicketStatus, TicketStatus>();
+        allowedTransitions.put(TicketStatus.RECEIVED, TicketStatus.CLOSED);
+        allowedTransitions.put(TicketStatus.DO_NOT_TREAT, TicketStatus.CLOSED);
+        allowedTransitions.put(TicketStatus.TREATED, TicketStatus.CLOSED);
+        allowedTransitions.put(TicketStatus.TREATED, TicketStatus.BEING_TREATED);
+
+        if (
+            !allowedTransitions.containsKey(oldStatus) || !allowedTransitions.get(oldStatus).equals(newStatus)
+        ) throw new BadRequestAlertException(
+            String.format("Transition not allowed to clients, from %s to %s on Ticket: %d", oldStatus, newStatus, ticketId),
+            "ticket",
+            "transitionnotallowed"
+        );
+
+        //check if the ticket has been created by the requester
+        Long connectedUserId = userService.getUserWithAuthorities().get().getId();
+        Long ticketOwnerClientId = optionalTicketDTO.get().getIssuedBy().getId();
+        Long ticketOwnerUserId = clientService.findOne(ticketOwnerClientId).get().getUser().getId();
+
+        if (!ticketOwnerUserId.equals(connectedUserId)) throw new BadRequestAlertException(
+            String.format("Not allowed action. The requester is not the owner of the Ticket: %d", ticketId),
+            "ticket",
+            "ticketnotowned"
+        );
+
+        //Now we just define what this function should do in a perfect scenario
+        TicketDTO ticketDTO = optionalTicketDTO.get();
+        ticketDTO.setStatus(newStatus);
+        Ticket ticket = ticketMapper.toEntity(ticketDTO);
+        return ticketMapper.toDto(ticketRepository.save(ticket));
     }
 }
