@@ -32,11 +32,6 @@ enum TicketStatus {
     CLOSED
 }
 
-enum VendorStatus {
-	ACTIVE,
-    INACTIVE
-}
-
 relationship OneToOne {
   Client {User(login)} to User
   Agent {User(login)} to User
