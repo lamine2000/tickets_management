@@ -86,6 +86,7 @@ public class SecurityConfiguration {
             .antMatchers("/api/admin/**").hasAuthority(AuthoritiesConstants.ADMIN)
         /***********BEGIN CUSTOM***********/
             .antMatchers("/api/tickets/clients/**").hasAuthority(AuthoritiesConstants.CLIENT)
+            .regexMatchers("/api/tickets/\\d+/clients/*").hasAuthority(AuthoritiesConstants.CLIENT)
         /***********END CUSTOM***********/
             .antMatchers("/api/**").authenticated()
 

@@ -233,4 +233,16 @@ public class TicketResource {
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
+
+    /**
+     * {@code GET  /tickets/clients/} : get the "id" ticket of the current client.
+     *
+     * @return the {@link ResponseEntity} with status {@code                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/{id}/clients")
+    public ResponseEntity<TicketDTO> getOneTicketOfConnectedClient(@PathVariable Long id) {
+        log.debug("REST request to get the {} ticket of connected Client", id);
+        Optional<TicketDTO> ticketDTO = ticketService.findOneTicketOfConnectedClient(id);
+        return ResponseUtil.wrapOrNotFound(ticketDTO);
+    }
 }

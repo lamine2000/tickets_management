@@ -71,4 +71,12 @@ public interface TicketService {
      * @return the persisted entity.
      */
     TicketDTO saveWithConnectedClient(TicketDTO ticketDTO);
+
+    /**
+     * Get the "ticketId" ticket if it has been created by the connected Client.
+     *
+     * @param ticketId the id of the entity.
+     * @return the entity.
+     */
+    Optional<TicketDTO> findOneTicketOfConnectedClient(Long ticketId);
 }

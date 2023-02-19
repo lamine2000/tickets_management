@@ -18,6 +18,7 @@ import sn.trivial.ticket.domain.User;
 import sn.trivial.ticket.domain.enumeration.TicketStatus;
 import sn.trivial.ticket.repository.TicketRepository;
 import sn.trivial.ticket.security.AuthoritiesConstants;
+import sn.trivial.ticket.security.SecurityUtils;
 import sn.trivial.ticket.service.AgentService;
 import sn.trivial.ticket.service.ClientService;
 import sn.trivial.ticket.service.TicketService;
@@ -28,6 +29,7 @@ import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.service.dto.UserDTO;
 import sn.trivial.ticket.service.mapper.TicketMapper;
 import sn.trivial.ticket.service.mapper.UserMapper;
+import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 
 /**
  * Service Implementation for managing {@link Ticket}.
@@ -158,5 +160,19 @@ public class TicketServiceImpl implements TicketService {
         Ticket ticket = ticketMapper.toEntity(ticketDTO);
         ticket = ticketRepository.save(ticket);
         return ticketMapper.toDto(ticket);
+    }
+
+    @Override
+    public Optional<TicketDTO> findOneTicketOfConnectedClient(Long ticketId) {
+        log.debug("Request to get Ticket : {} if created by connected Client", ticketId);
+        Optional<TicketDTO> optionalTicketDTO = this.findOne(ticketId);
+        if (optionalTicketDTO.isEmpty()) return optionalTicketDTO;
+
+        Long connectedUserId = userService.getUserWithAuthorities().get().getId();
+
+        Long ticketOwnerClientId = optionalTicketDTO.get().getIssuedBy().getId();
+        Long ticketOwnerUserId = clientService.findOne(ticketOwnerClientId).get().getUser().getId();
+
+        return connectedUserId.equals(ticketOwnerUserId) ? optionalTicketDTO : Optional.empty();
     }
 }
