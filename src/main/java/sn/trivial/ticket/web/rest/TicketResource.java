@@ -229,17 +229,8 @@ public class TicketResource {
         throws URISyntaxException {
         log.debug("REST request to create a ticket issued by the connected Client, with a first message : {}", ticketAndMessageVM);
         TicketDTO ticketDTO = ticketAndMessageVM.getTicket();
-        String messageContent = ticketAndMessageVM.getMessageContent();
         if (ticketDTO.getId() != null) {
             throw new BadRequestAlertException("A new ticket cannot already have an ID", ENTITY_NAME, "idexists");
-        }
-
-        if (messageContent.isBlank()) {
-            throw new BadRequestAlertException(
-                String.format("Cannot create a ticket with an empty message: %s", ticketDTO),
-                "ticket",
-                "ticketstatenotallowed"
-            );
         }
 
         TicketDTO result = ticketService.saveWithConnectedClient(ticketAndMessageVM);

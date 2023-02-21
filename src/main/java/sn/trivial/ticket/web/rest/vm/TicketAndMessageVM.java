@@ -1,5 +1,6 @@
 package sn.trivial.ticket.web.rest.vm;
 
+import javax.validation.constraints.NotBlank;
 import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.service.dto.TicketDTO;
 
@@ -10,6 +11,7 @@ public class TicketAndMessageVM {
 
     private TicketDTO ticketDTO;
 
+    @NotBlank
     private String messageContent;
 
     public TicketDTO getTicket() {
