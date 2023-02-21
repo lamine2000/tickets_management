@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
+import sn.trivial.ticket.web.rest.vm.TicketAndMessageVM;
 
 /**
  * Service Interface for managing {@link sn.trivial.ticket.domain.Ticket}.
@@ -71,7 +72,7 @@ public interface TicketService {
      * @param ticketDTO the entity to save.
      * @return the persisted entity.
      */
-    TicketDTO saveWithConnectedClient(TicketDTO ticketDTO);
+    TicketDTO saveWithConnectedClient(TicketAndMessageVM ticketAndMessageVM);
 
     /**
      * Get the "ticketId" ticket if it has been created by the connected Client.

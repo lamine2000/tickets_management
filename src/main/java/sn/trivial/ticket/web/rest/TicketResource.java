@@ -20,9 +20,11 @@ import sn.trivial.ticket.repository.TicketRepository;
 import sn.trivial.ticket.service.TicketQueryService;
 import sn.trivial.ticket.service.TicketService;
 import sn.trivial.ticket.service.criteria.TicketCriteria;
+import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
+import sn.trivial.ticket.web.rest.vm.TicketAndMessageVM;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -218,17 +220,29 @@ public class TicketResource {
     /**
      * {@code POST  /tickets/clients} : Create a new ticket by the connected Client.
      *
-     * @param ticketDTO the ticketDTO to create.
+     * @param ticketAndMessageVM the ticket to create and message to assign to link to the ticket.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new ticketDTO, or with status {@code 400 (Bad Request)} if the ticket has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/tickets/clients")
-    public ResponseEntity<TicketDTO> createTicketWithConnectedClient(@Valid @RequestBody TicketDTO ticketDTO) throws URISyntaxException {
-        log.debug("REST request to save Ticket : {}", ticketDTO);
+    public ResponseEntity<TicketDTO> createTicketWithConnectedClient(@Valid @RequestBody TicketAndMessageVM ticketAndMessageVM)
+        throws URISyntaxException {
+        log.debug("REST request to create a ticket issued by the connected Client, with a first message : {}", ticketAndMessageVM);
+        TicketDTO ticketDTO = ticketAndMessageVM.getTicket();
+        String messageContent = ticketAndMessageVM.getMessageContent();
         if (ticketDTO.getId() != null) {
             throw new BadRequestAlertException("A new ticket cannot already have an ID", ENTITY_NAME, "idexists");
         }
-        TicketDTO result = ticketService.saveWithConnectedClient(ticketDTO);
+
+        if (messageContent.isBlank()) {
+            throw new BadRequestAlertException(
+                String.format("Cannot create a ticket with an empty message: %s", ticketDTO),
+                "ticket",
+                "ticketstatenotallowed"
+            );
+        }
+
+        TicketDTO result = ticketService.saveWithConnectedClient(ticketAndMessageVM);
         return ResponseEntity
             .created(new URI("/api/tickets/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -270,5 +284,4 @@ public class TicketResource {
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
-    //TODO: secure and test the /tickets/change-status endpoint
 }

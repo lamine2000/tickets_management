@@ -18,16 +18,15 @@ import sn.trivial.ticket.security.AuthoritiesConstants;
 import sn.trivial.ticket.security.SecurityUtils;
 import sn.trivial.ticket.service.AgentService;
 import sn.trivial.ticket.service.ClientService;
+import sn.trivial.ticket.service.MessageService;
 import sn.trivial.ticket.service.TicketService;
 import sn.trivial.ticket.service.UserService;
-import sn.trivial.ticket.service.dto.AdminUserDTO;
-import sn.trivial.ticket.service.dto.AgentDTO;
-import sn.trivial.ticket.service.dto.TicketDTO;
-import sn.trivial.ticket.service.dto.UserDTO;
+import sn.trivial.ticket.service.dto.*;
 import sn.trivial.ticket.service.mapper.TicketMapper;
 import sn.trivial.ticket.service.mapper.UserMapper;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
+import sn.trivial.ticket.web.rest.vm.TicketAndMessageVM;
 
 /**
  * Service Implementation for managing {@link Ticket}.
@@ -48,6 +47,8 @@ public class TicketServiceImpl implements TicketService {
 
     private final AgentService agentService;
 
+    private final MessageService messageService;
+
     private final UserMapper userMapper;
 
     public TicketServiceImpl(
@@ -56,6 +57,7 @@ public class TicketServiceImpl implements TicketService {
         UserService userService,
         ClientService clientService,
         AgentService agentService,
+        MessageService messageService,
         UserMapper userMapper
     ) {
         this.ticketRepository = ticketRepository;
@@ -63,6 +65,7 @@ public class TicketServiceImpl implements TicketService {
         this.userService = userService;
         this.clientService = clientService;
         this.agentService = agentService;
+        this.messageService = messageService;
         this.userMapper = userMapper;
     }
 
@@ -128,8 +131,11 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketDTO saveWithConnectedClient(TicketDTO ticketDTO) {
-        log.debug("Request to save Ticket created by the currently connected Client: {}", ticketDTO);
+    public TicketDTO saveWithConnectedClient(TicketAndMessageVM ticketAndMessageVM) {
+        log.debug("Request to save Ticket created by the currently connected Client, with the first message: {}", ticketAndMessageVM);
+
+        TicketDTO ticketDTO = ticketAndMessageVM.getTicket();
+        String messageContent = ticketAndMessageVM.getMessageContent();
 
         User user = userService.getUserWithAuthorities().get();
 
@@ -157,7 +163,14 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket ticket = ticketMapper.toEntity(ticketDTO);
         ticket = ticketRepository.save(ticket);
-        return ticketMapper.toDto(ticket);
+        ticketDTO = ticketMapper.toDto(ticket);
+
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setTicket(ticketDTO);
+        messageDTO.setContent(messageContent.trim());
+        messageService.save(messageDTO);
+
+        return ticketDTO;
     }
 
     @Override
