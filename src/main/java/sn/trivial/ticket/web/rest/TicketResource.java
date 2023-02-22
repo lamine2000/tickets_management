@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +25,8 @@ import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
-import sn.trivial.ticket.web.rest.vm.TicketAndMessageVM;
 import sn.trivial.ticket.web.rest.vm.TicketIdAndMessageContentVM;
+import sn.trivial.ticket.web.rest.vm.TicketIssueDescriptionAndMessageVM;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -221,20 +222,20 @@ public class TicketResource {
     /**
      * {@code POST  /tickets/clients} : Create a new ticket by the connected Client.
      *
-     * @param ticketAndMessageVM the ticket to create and message to assign to link to the ticket.
+     * @param ticketIssueDescriptionAndMessageVM the ticket to create and message to assign to link to the ticket.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new ticketDTO, or with status {@code 400 (Bad Request)} if the ticket has already an ID.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/tickets/clients")
-    public ResponseEntity<TicketDTO> createTicketWithConnectedClient(@Valid @RequestBody TicketAndMessageVM ticketAndMessageVM)
-        throws URISyntaxException {
-        log.debug("REST request to create a ticket issued by the connected Client, with a first message : {}", ticketAndMessageVM);
-        TicketDTO ticketDTO = ticketAndMessageVM.getTicket();
-        if (ticketDTO.getId() != null) {
-            throw new BadRequestAlertException("A new ticket cannot already have an ID", ENTITY_NAME, "idexists");
-        }
+    public ResponseEntity<TicketDTO> createTicketWithConnectedClient(
+        @Valid @RequestBody TicketIssueDescriptionAndMessageVM ticketIssueDescriptionAndMessageVM
+    ) throws URISyntaxException {
+        log.debug(
+            "REST request to create a ticket issued by the connected Client, with a first message : {}",
+            ticketIssueDescriptionAndMessageVM
+        );
 
-        TicketDTO result = ticketService.saveWithConnectedClient(ticketAndMessageVM);
+        TicketDTO result = ticketService.createTicketWithConnectedClient(ticketIssueDescriptionAndMessageVM);
         return ResponseEntity
             .created(new URI("/api/tickets/" + result.getId()))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
@@ -285,16 +286,17 @@ public class TicketResource {
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
     @PostMapping("/tickets/{id}/send-message/clients")
-    public ResponseEntity<MessageDTO> sendMessageByConnectedClient(
-        @Valid @RequestBody TicketIdAndMessageContentVM ticketIdAndMessageContentVM
-    ) throws URISyntaxException {
+    public ResponseEntity<MessageDTO> sendMessageByConnectedClient(@PathVariable Long id, @NotBlank @RequestBody String messageContent)
+        throws URISyntaxException {
+        TicketIdAndMessageContentVM ticketIdAndMessageContentVM = new TicketIdAndMessageContentVM();
+        ticketIdAndMessageContentVM.setMessageContent(messageContent);
+        ticketIdAndMessageContentVM.setTicketId(id);
         log.debug("REST request to save Message linked to a ticket issued by the connected client: {}", ticketIdAndMessageContentVM);
 
         MessageDTO result = ticketService.sendMessageByConnectedClient(ticketIdAndMessageContentVM);
         return ResponseEntity
-            .created(new URI("/tickets/{id}/send-message/clients" + result.getId() + "/clients"))
+            .created(new URI("/tickets" + result.getId() + "/send-message/clients"))
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
-    //TODO: Test that endpoint
 }

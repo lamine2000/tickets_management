@@ -135,18 +135,23 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public TicketDTO saveWithConnectedClient(TicketAndMessageVM ticketAndMessageVM) {
-        log.debug("Request to save Ticket created by the currently connected Client, with the first message: {}", ticketAndMessageVM);
+    public TicketDTO createTicketWithConnectedClient(TicketIssueDescriptionAndMessageVM ticketIssueDescriptionAndMessageVM) {
+        log.debug(
+            "Request to save Ticket created by the currently connected Client, with the first message: {}",
+            ticketIssueDescriptionAndMessageVM
+        );
 
-        TicketDTO ticketDTO = ticketAndMessageVM.getTicket();
-        String messageContent = ticketAndMessageVM.getMessageContent();
+        String issueDescription = ticketIssueDescriptionAndMessageVM.getIssueDescription();
+        String messageContent = ticketIssueDescriptionAndMessageVM.getMessageContent();
 
         User user = userService.getUserWithAuthorities().get();
 
+        TicketDTO ticketDTO = new TicketDTO();
         ticketDTO.setIssuedBy(clientService.findByUser_Login(user.getLogin()).get());
         ticketDTO.setIssuedAt(Instant.now());
         ticketDTO.setCode(String.format("T-%s-%s", user.getId(), UUID.randomUUID()));
         ticketDTO.setStatus(TicketStatus.RECEIVED);
+        ticketDTO.setIssueDescription(issueDescription);
 
         //the "no_agent" agent should always exist
         Optional<AgentDTO> noAgent = agentService.findByUser_Login("no_agent");
@@ -186,12 +191,7 @@ public class TicketServiceImpl implements TicketService {
         Optional<TicketDTO> optionalTicketDTO = this.findOne(ticketId);
         if (optionalTicketDTO.isEmpty()) return optionalTicketDTO;
 
-        Long connectedUserId = userService.getUserWithAuthorities().get().getId();
-
-        Long ticketOwnerClientId = optionalTicketDTO.get().getIssuedBy().getId();
-        Long ticketOwnerUserId = clientService.findOne(ticketOwnerClientId).get().getUser().getId();
-
-        return connectedUserId.equals(ticketOwnerUserId) ? optionalTicketDTO : Optional.empty();
+        return isIssuedByConnectedUser(ticketId) ? optionalTicketDTO : Optional.empty();
     }
 
     @Override
