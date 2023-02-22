@@ -1,7 +1,12 @@
 package sn.trivial.ticket.service.impl;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -10,19 +15,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sn.trivial.ticket.domain.Authority;
 import sn.trivial.ticket.domain.Ticket;
 import sn.trivial.ticket.domain.User;
 import sn.trivial.ticket.domain.enumeration.TicketStatus;
 import sn.trivial.ticket.repository.TicketRepository;
 import sn.trivial.ticket.security.AuthoritiesConstants;
-import sn.trivial.ticket.security.SecurityUtils;
-import sn.trivial.ticket.service.AgentService;
-import sn.trivial.ticket.service.ClientService;
-import sn.trivial.ticket.service.MessageService;
-import sn.trivial.ticket.service.TicketService;
-import sn.trivial.ticket.service.UserService;
-import sn.trivial.ticket.service.dto.*;
+import sn.trivial.ticket.service.*;
+import sn.trivial.ticket.service.dto.AdminUserDTO;
+import sn.trivial.ticket.service.dto.AgentDTO;
+import sn.trivial.ticket.service.dto.MessageDTO;
+import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.service.mapper.TicketMapper;
 import sn.trivial.ticket.service.mapper.UserMapper;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
@@ -213,14 +215,14 @@ public class TicketServiceImpl implements TicketService {
         TicketStatus oldStatus = optionalTicketDTO.get().getStatus();
         TicketStatus newStatus = changeTicketStatusVM.getTicketStatus();
 
-        Map allowedTransitions = new HashMap<TicketStatus, TicketStatus>();
+        Multimap<TicketStatus, TicketStatus> allowedTransitions = ArrayListMultimap.create();
         allowedTransitions.put(TicketStatus.RECEIVED, TicketStatus.CLOSED);
         allowedTransitions.put(TicketStatus.DO_NOT_TREAT, TicketStatus.CLOSED);
         allowedTransitions.put(TicketStatus.TREATED, TicketStatus.CLOSED);
         allowedTransitions.put(TicketStatus.TREATED, TicketStatus.BEING_TREATED);
 
         if (
-            !allowedTransitions.containsKey(oldStatus) || !allowedTransitions.get(oldStatus).equals(newStatus)
+            !allowedTransitions.containsKey(oldStatus) || !allowedTransitions.get(oldStatus).contains(newStatus)
         ) throw new BadRequestAlertException(
             String.format("Transition not allowed to clients, from %s to %s on Ticket: %d", oldStatus, newStatus, ticketId),
             "ticket",
@@ -271,12 +273,11 @@ public class TicketServiceImpl implements TicketService {
         //check if the ticket exists
         Optional<TicketDTO> optionalTicketDTO = findOne(ticketId);
 
-        if (optionalTicketDTO.isEmpty()) return false;
-
-        //check if the ticket's current status allows a client to send a message
-        return Stream
-            .of(TicketStatus.TREATED, TicketStatus.PENDING)
-            .anyMatch(allowedStatus -> optionalTicketDTO.get().getStatus().equals(allowedStatus));
+        return optionalTicketDTO
+            .filter(ticketDTO ->
+                Stream.of(TicketStatus.TREATED, TicketStatus.PENDING).anyMatch(allowedStatus -> ticketDTO.getStatus().equals(allowedStatus))
+            )
+            .isPresent();
     }
 
     @Override

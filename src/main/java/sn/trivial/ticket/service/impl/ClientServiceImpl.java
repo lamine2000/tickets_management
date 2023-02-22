@@ -91,7 +91,6 @@ public class ClientServiceImpl implements ClientService {
         log.debug("Request the Client associated with user : {}", login);
         Optional<Client> optionalClient = clientRepository.findByUser_Login(login);
 
-        if (optionalClient.isEmpty()) return Optional.empty();
-        return Optional.of(clientMapper.toDto(optionalClient.get()));
+        return optionalClient.map(clientMapper::toDto);
     }
 }
