@@ -26,4 +26,9 @@ public class TicketIdAndMessageContentVM {
     public void setMessageContent(String messageContent) {
         this.messageContent = messageContent;
     }
+
+    @Override
+    public String toString() {
+        return "TicketIdAndMessageContentVM{" + "ticketId=" + ticketId + ", messageContent='" + messageContent + '\'' + '}';
+    }
 }
