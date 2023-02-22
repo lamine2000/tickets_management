@@ -10,6 +10,11 @@
       "fieldType": "byte[]",
       "fieldTypeBlobContent": "text",
       "fieldValidateRules": ["required"]
+    },
+    {
+      "fieldName": "sentAt",
+      "fieldType": "Instant",
+      "fieldValidateRules": ["required"]
     }
   ],
   "fluentMethods": true,
@@ -21,6 +26,11 @@
     {
       "otherEntityName": "ticket",
       "relationshipName": "ticket",
+      "relationshipType": "many-to-one"
+    },
+    {
+      "otherEntityName": "user",
+      "relationshipName": "sentBy",
       "relationshipType": "many-to-one"
     }
   ],

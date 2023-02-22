@@ -19,7 +19,9 @@
       },
       "id": "ID",
       "content": "Content",
-      "ticket": "Ticket"
+      "sentAt": "Sent At",
+      "ticket": "Ticket",
+      "sentBy": "Sent By"
     }
   }
 }

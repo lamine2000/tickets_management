@@ -17,11 +17,18 @@
             <column name="content" type="${clobType}">
                 <constraints nullable="false" />
             </column>
+            <column name="sent_at" type="${datetimeType}">
+                <constraints nullable="false" />
+            </column>
             <column name="ticket_id" type="bigint">
+                <constraints nullable="true" />
+            </column>
+            <column name="sent_by_id" type="bigint">
                 <constraints nullable="true" />
             </column>
             <!-- jhipster-needle-liquibase-add-column - JHipster will add columns here -->
         </createTable>
+        <dropDefaultValue tableName="message" columnName="sent_at" columnDataType="${datetimeType}"/>
     </changeSet>
 
     <!-- jhipster-needle-liquibase-add-changeset - JHipster will add changesets here -->
@@ -42,6 +49,7 @@
                   usePreparedStatements="true">
             <column name="id" type="numeric"/>
             <column name="content" type="clob"/>
+            <column name="sent_at" type="date"/>
             <!-- jhipster-needle-liquibase-add-loadcolumn - JHipster (and/or extensions) can add load columns here -->
         </loadData>
     </changeSet>

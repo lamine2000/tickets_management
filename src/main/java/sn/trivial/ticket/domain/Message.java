@@ -2,6 +2,7 @@ package sn.trivial.ticket.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.io.Serializable;
+import java.time.Instant;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import org.hibernate.annotations.Type;
@@ -27,9 +28,16 @@ public class Message implements Serializable {
     @Column(name = "content", nullable = false)
     private String content;
 
+    @NotNull
+    @Column(name = "sent_at", nullable = false)
+    private Instant sentAt;
+
     @ManyToOne
     @JsonIgnoreProperties(value = { "issuedBy", "assignedTo" }, allowSetters = true)
     private Ticket ticket;
+
+    @ManyToOne
+    private User sentBy;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here
 
@@ -59,6 +67,19 @@ public class Message implements Serializable {
         this.content = content;
     }
 
+    public Instant getSentAt() {
+        return this.sentAt;
+    }
+
+    public Message sentAt(Instant sentAt) {
+        this.setSentAt(sentAt);
+        return this;
+    }
+
+    public void setSentAt(Instant sentAt) {
+        this.sentAt = sentAt;
+    }
+
     public Ticket getTicket() {
         return this.ticket;
     }
@@ -69,6 +90,19 @@ public class Message implements Serializable {
 
     public Message ticket(Ticket ticket) {
         this.setTicket(ticket);
+        return this;
+    }
+
+    public User getSentBy() {
+        return this.sentBy;
+    }
+
+    public void setSentBy(User user) {
+        this.sentBy = user;
+    }
+
+    public Message sentBy(User user) {
+        this.setSentBy(user);
         return this;
     }
 
@@ -97,6 +131,7 @@ public class Message implements Serializable {
         return "Message{" +
             "id=" + getId() +
             ", content='" + getContent() + "'" +
+            ", sentAt='" + getSentAt() + "'" +
             "}";
     }
 }

@@ -15,7 +15,7 @@ describe('Message e2e test', () => {
   const messagePageUrlPattern = new RegExp('/message(\\?.*)?$');
   const username = Cypress.env('E2E_USERNAME') ?? 'user';
   const password = Cypress.env('E2E_PASSWORD') ?? 'user';
-  const messageSample = { content: 'Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci50eHQ=' };
+  const messageSample = { content: 'Li4vZmFrZS1kYXRhL2Jsb2IvaGlwc3Rlci50eHQ=', sentAt: '2023-02-16T08:25:49.361Z' };
 
   let message;
 
@@ -166,6 +166,8 @@ describe('Message e2e test', () => {
         .type('../fake-data/blob/hipster.txt')
         .invoke('val')
         .should('match', new RegExp('../fake-data/blob/hipster.txt'));
+
+      cy.get(`[data-cy="sentAt"]`).type('2023-02-16T05:44').blur().should('have.value', '2023-02-16T05:44');
 
       cy.get(entityCreateSaveButtonSelector).click();
 

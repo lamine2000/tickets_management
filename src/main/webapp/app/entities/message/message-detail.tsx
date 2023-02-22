@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Row, Col } from 'reactstrap';
-import { Translate, byteSize } from 'react-jhipster';
+import { Translate, byteSize, TextFormat } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
@@ -39,9 +39,19 @@ export const MessageDetail = () => {
           </dt>
           <dd>{messageEntity.content}</dd>
           <dt>
+            <span id="sentAt">
+              <Translate contentKey="ticketsManagementApp.message.sentAt">Sent At</Translate>
+            </span>
+          </dt>
+          <dd>{messageEntity.sentAt ? <TextFormat value={messageEntity.sentAt} type="date" format={APP_DATE_FORMAT} /> : null}</dd>
+          <dt>
             <Translate contentKey="ticketsManagementApp.message.ticket">Ticket</Translate>
           </dt>
           <dd>{messageEntity.ticket ? messageEntity.ticket.id : ''}</dd>
+          <dt>
+            <Translate contentKey="ticketsManagementApp.message.sentBy">Sent By</Translate>
+          </dt>
+          <dd>{messageEntity.sentBy ? messageEntity.sentBy.id : ''}</dd>
         </dl>
         <Button tag={Link} to="/message" replace color="info" data-cy="entityDetailsBackButton">
           <FontAwesomeIcon icon="arrow-left" />{' '}

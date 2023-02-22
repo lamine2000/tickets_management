@@ -13,5 +13,11 @@
                                  constraintName="fk_message__ticket_id"
                                  referencedColumnNames="id"
                                  referencedTableName="ticket"/>
+
+        <addForeignKeyConstraint baseColumnNames="sent_by_id"
+                                 baseTableName="message"
+                                 constraintName="fk_message__sent_by_id"
+                                 referencedColumnNames="id"
+                                 referencedTableName="jhi_user"/>
     </changeSet>
 </databaseChangeLog>

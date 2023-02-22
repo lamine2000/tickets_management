@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -21,6 +23,7 @@ import org.springframework.util.Base64Utils;
 import sn.trivial.ticket.IntegrationTest;
 import sn.trivial.ticket.domain.Message;
 import sn.trivial.ticket.domain.Ticket;
+import sn.trivial.ticket.domain.User;
 import sn.trivial.ticket.repository.MessageRepository;
 import sn.trivial.ticket.service.criteria.MessageCriteria;
 import sn.trivial.ticket.service.dto.MessageDTO;
@@ -36,6 +39,9 @@ class MessageResourceIT {
 
     private static final String DEFAULT_CONTENT = "AAAAAAAAAA";
     private static final String UPDATED_CONTENT = "BBBBBBBBBB";
+
+    private static final Instant DEFAULT_SENT_AT = Instant.ofEpochMilli(0L);
+    private static final Instant UPDATED_SENT_AT = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
     private static final String ENTITY_API_URL = "/api/messages";
     private static final String ENTITY_API_URL_ID = ENTITY_API_URL + "/{id}";
@@ -64,7 +70,7 @@ class MessageResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Message createEntity(EntityManager em) {
-        Message message = new Message().content(DEFAULT_CONTENT);
+        Message message = new Message().content(DEFAULT_CONTENT).sentAt(DEFAULT_SENT_AT);
         return message;
     }
 
@@ -75,7 +81,7 @@ class MessageResourceIT {
      * if they test an entity which requires the current entity.
      */
     public static Message createUpdatedEntity(EntityManager em) {
-        Message message = new Message().content(UPDATED_CONTENT);
+        Message message = new Message().content(UPDATED_CONTENT).sentAt(UPDATED_SENT_AT);
         return message;
     }
 
@@ -99,6 +105,7 @@ class MessageResourceIT {
         assertThat(messageList).hasSize(databaseSizeBeforeCreate + 1);
         Message testMessage = messageList.get(messageList.size() - 1);
         assertThat(testMessage.getContent()).isEqualTo(DEFAULT_CONTENT);
+        assertThat(testMessage.getSentAt()).isEqualTo(DEFAULT_SENT_AT);
     }
 
     @Test
@@ -122,6 +129,24 @@ class MessageResourceIT {
 
     @Test
     @Transactional
+    void checkSentAtIsRequired() throws Exception {
+        int databaseSizeBeforeTest = messageRepository.findAll().size();
+        // set the field null
+        message.setSentAt(null);
+
+        // Create the Message, which fails.
+        MessageDTO messageDTO = messageMapper.toDto(message);
+
+        restMessageMockMvc
+            .perform(post(ENTITY_API_URL).contentType(MediaType.APPLICATION_JSON).content(TestUtil.convertObjectToJsonBytes(messageDTO)))
+            .andExpect(status().isBadRequest());
+
+        List<Message> messageList = messageRepository.findAll();
+        assertThat(messageList).hasSize(databaseSizeBeforeTest);
+    }
+
+    @Test
+    @Transactional
     void getAllMessages() throws Exception {
         // Initialize the database
         messageRepository.saveAndFlush(message);
@@ -132,7 +157,8 @@ class MessageResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(message.getId().intValue())))
-            .andExpect(jsonPath("$.[*].content").value(hasItem(DEFAULT_CONTENT.toString())));
+            .andExpect(jsonPath("$.[*].content").value(hasItem(DEFAULT_CONTENT.toString())))
+            .andExpect(jsonPath("$.[*].sentAt").value(hasItem(DEFAULT_SENT_AT.toString())));
     }
 
     @Test
@@ -147,7 +173,8 @@ class MessageResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.id").value(message.getId().intValue()))
-            .andExpect(jsonPath("$.content").value(DEFAULT_CONTENT.toString()));
+            .andExpect(jsonPath("$.content").value(DEFAULT_CONTENT.toString()))
+            .andExpect(jsonPath("$.sentAt").value(DEFAULT_SENT_AT.toString()));
     }
 
     @Test
@@ -166,6 +193,45 @@ class MessageResourceIT {
 
         defaultMessageShouldBeFound("id.lessThanOrEqual=" + id);
         defaultMessageShouldNotBeFound("id.lessThan=" + id);
+    }
+
+    @Test
+    @Transactional
+    void getAllMessagesBySentAtIsEqualToSomething() throws Exception {
+        // Initialize the database
+        messageRepository.saveAndFlush(message);
+
+        // Get all the messageList where sentAt equals to DEFAULT_SENT_AT
+        defaultMessageShouldBeFound("sentAt.equals=" + DEFAULT_SENT_AT);
+
+        // Get all the messageList where sentAt equals to UPDATED_SENT_AT
+        defaultMessageShouldNotBeFound("sentAt.equals=" + UPDATED_SENT_AT);
+    }
+
+    @Test
+    @Transactional
+    void getAllMessagesBySentAtIsInShouldWork() throws Exception {
+        // Initialize the database
+        messageRepository.saveAndFlush(message);
+
+        // Get all the messageList where sentAt in DEFAULT_SENT_AT or UPDATED_SENT_AT
+        defaultMessageShouldBeFound("sentAt.in=" + DEFAULT_SENT_AT + "," + UPDATED_SENT_AT);
+
+        // Get all the messageList where sentAt equals to UPDATED_SENT_AT
+        defaultMessageShouldNotBeFound("sentAt.in=" + UPDATED_SENT_AT);
+    }
+
+    @Test
+    @Transactional
+    void getAllMessagesBySentAtIsNullOrNotNull() throws Exception {
+        // Initialize the database
+        messageRepository.saveAndFlush(message);
+
+        // Get all the messageList where sentAt is not null
+        defaultMessageShouldBeFound("sentAt.specified=true");
+
+        // Get all the messageList where sentAt is null
+        defaultMessageShouldNotBeFound("sentAt.specified=false");
     }
 
     @Test
@@ -191,6 +257,29 @@ class MessageResourceIT {
         defaultMessageShouldNotBeFound("ticketId.equals=" + (ticketId + 1));
     }
 
+    @Test
+    @Transactional
+    void getAllMessagesBySentByIsEqualToSomething() throws Exception {
+        User sentBy;
+        if (TestUtil.findAll(em, User.class).isEmpty()) {
+            messageRepository.saveAndFlush(message);
+            sentBy = UserResourceIT.createEntity(em);
+        } else {
+            sentBy = TestUtil.findAll(em, User.class).get(0);
+        }
+        em.persist(sentBy);
+        em.flush();
+        message.setSentBy(sentBy);
+        messageRepository.saveAndFlush(message);
+        Long sentById = sentBy.getId();
+
+        // Get all the messageList where sentBy equals to sentById
+        defaultMessageShouldBeFound("sentById.equals=" + sentById);
+
+        // Get all the messageList where sentBy equals to (sentById + 1)
+        defaultMessageShouldNotBeFound("sentById.equals=" + (sentById + 1));
+    }
+
     /**
      * Executes the search, and checks that the default entity is returned.
      */
@@ -200,7 +289,8 @@ class MessageResourceIT {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(message.getId().intValue())))
-            .andExpect(jsonPath("$.[*].content").value(hasItem(DEFAULT_CONTENT.toString())));
+            .andExpect(jsonPath("$.[*].content").value(hasItem(DEFAULT_CONTENT.toString())))
+            .andExpect(jsonPath("$.[*].sentAt").value(hasItem(DEFAULT_SENT_AT.toString())));
 
         // Check, that the count call also returns 1
         restMessageMockMvc
@@ -248,7 +338,7 @@ class MessageResourceIT {
         Message updatedMessage = messageRepository.findById(message.getId()).get();
         // Disconnect from session so that the updates on updatedMessage are not directly saved in db
         em.detach(updatedMessage);
-        updatedMessage.content(UPDATED_CONTENT);
+        updatedMessage.content(UPDATED_CONTENT).sentAt(UPDATED_SENT_AT);
         MessageDTO messageDTO = messageMapper.toDto(updatedMessage);
 
         restMessageMockMvc
@@ -264,6 +354,7 @@ class MessageResourceIT {
         assertThat(messageList).hasSize(databaseSizeBeforeUpdate);
         Message testMessage = messageList.get(messageList.size() - 1);
         assertThat(testMessage.getContent()).isEqualTo(UPDATED_CONTENT);
+        assertThat(testMessage.getSentAt()).isEqualTo(UPDATED_SENT_AT);
     }
 
     @Test
@@ -356,6 +447,7 @@ class MessageResourceIT {
         assertThat(messageList).hasSize(databaseSizeBeforeUpdate);
         Message testMessage = messageList.get(messageList.size() - 1);
         assertThat(testMessage.getContent()).isEqualTo(DEFAULT_CONTENT);
+        assertThat(testMessage.getSentAt()).isEqualTo(DEFAULT_SENT_AT);
     }
 
     @Test
@@ -370,7 +462,7 @@ class MessageResourceIT {
         Message partialUpdatedMessage = new Message();
         partialUpdatedMessage.setId(message.getId());
 
-        partialUpdatedMessage.content(UPDATED_CONTENT);
+        partialUpdatedMessage.content(UPDATED_CONTENT).sentAt(UPDATED_SENT_AT);
 
         restMessageMockMvc
             .perform(
@@ -385,6 +477,7 @@ class MessageResourceIT {
         assertThat(messageList).hasSize(databaseSizeBeforeUpdate);
         Message testMessage = messageList.get(messageList.size() - 1);
         assertThat(testMessage.getContent()).isEqualTo(UPDATED_CONTENT);
+        assertThat(testMessage.getSentAt()).isEqualTo(UPDATED_SENT_AT);
     }
 
     @Test

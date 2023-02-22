@@ -21,6 +21,7 @@ entity Agent {
 
 entity Message {
 	content TextBlob required
+    sentAt Instant required
 }
 
 enum TicketStatus {
@@ -41,6 +42,7 @@ relationship ManyToOne {
   Ticket {issuedBy} to Client
   Ticket {assignedTo} to Agent
   Message {ticket} to Ticket
+  Message {sentBy} to User
 }
 
 paginate * with pagination

@@ -168,6 +168,8 @@ public class TicketServiceImpl implements TicketService {
         MessageDTO messageDTO = new MessageDTO();
         messageDTO.setTicket(ticketDTO);
         messageDTO.setContent(messageContent.trim());
+        messageDTO.setSentBy(userMapper.toDtoId(user));
+        messageDTO.setSentAt(Instant.now());
         messageService.save(messageDTO);
 
         return ticketDTO;

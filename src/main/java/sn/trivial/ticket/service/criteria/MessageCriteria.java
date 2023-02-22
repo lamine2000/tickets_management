@@ -23,7 +23,11 @@ public class MessageCriteria implements Serializable, Criteria {
 
     private LongFilter id;
 
+    private InstantFilter sentAt;
+
     private LongFilter ticketId;
+
+    private LongFilter sentById;
 
     private Boolean distinct;
 
@@ -31,7 +35,9 @@ public class MessageCriteria implements Serializable, Criteria {
 
     public MessageCriteria(MessageCriteria other) {
         this.id = other.id == null ? null : other.id.copy();
+        this.sentAt = other.sentAt == null ? null : other.sentAt.copy();
         this.ticketId = other.ticketId == null ? null : other.ticketId.copy();
+        this.sentById = other.sentById == null ? null : other.sentById.copy();
         this.distinct = other.distinct;
     }
 
@@ -55,6 +61,21 @@ public class MessageCriteria implements Serializable, Criteria {
         this.id = id;
     }
 
+    public InstantFilter getSentAt() {
+        return sentAt;
+    }
+
+    public InstantFilter sentAt() {
+        if (sentAt == null) {
+            sentAt = new InstantFilter();
+        }
+        return sentAt;
+    }
+
+    public void setSentAt(InstantFilter sentAt) {
+        this.sentAt = sentAt;
+    }
+
     public LongFilter getTicketId() {
         return ticketId;
     }
@@ -68,6 +89,21 @@ public class MessageCriteria implements Serializable, Criteria {
 
     public void setTicketId(LongFilter ticketId) {
         this.ticketId = ticketId;
+    }
+
+    public LongFilter getSentById() {
+        return sentById;
+    }
+
+    public LongFilter sentById() {
+        if (sentById == null) {
+            sentById = new LongFilter();
+        }
+        return sentById;
+    }
+
+    public void setSentById(LongFilter sentById) {
+        this.sentById = sentById;
     }
 
     public Boolean getDistinct() {
@@ -87,12 +123,18 @@ public class MessageCriteria implements Serializable, Criteria {
             return false;
         }
         final MessageCriteria that = (MessageCriteria) o;
-        return Objects.equals(id, that.id) && Objects.equals(ticketId, that.ticketId) && Objects.equals(distinct, that.distinct);
+        return (
+            Objects.equals(id, that.id) &&
+            Objects.equals(sentAt, that.sentAt) &&
+            Objects.equals(ticketId, that.ticketId) &&
+            Objects.equals(sentById, that.sentById) &&
+            Objects.equals(distinct, that.distinct)
+        );
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, ticketId, distinct);
+        return Objects.hash(id, sentAt, ticketId, sentById, distinct);
     }
 
     // prettier-ignore
@@ -100,7 +142,9 @@ public class MessageCriteria implements Serializable, Criteria {
     public String toString() {
         return "MessageCriteria{" +
             (id != null ? "id=" + id + ", " : "") +
+            (sentAt != null ? "sentAt=" + sentAt + ", " : "") +
             (ticketId != null ? "ticketId=" + ticketId + ", " : "") +
+            (sentById != null ? "sentById=" + sentById + ", " : "") +
             (distinct != null ? "distinct=" + distinct + ", " : "") +
             "}";
     }

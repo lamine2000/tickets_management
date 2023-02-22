@@ -10,6 +10,8 @@ import { useAppDispatch, useAppSelector } from 'app/config/store';
 
 import { ITicket } from 'app/shared/model/ticket.model';
 import { getEntities as getTickets } from 'app/entities/ticket/ticket.reducer';
+import { IUser } from 'app/shared/model/user.model';
+import { getUsers } from 'app/modules/administration/user-management/user-management.reducer';
 import { IMessage } from 'app/shared/model/message.model';
 import { getEntity, updateEntity, createEntity, reset } from './message.reducer';
 
@@ -22,6 +24,7 @@ export const MessageUpdate = () => {
   const isNew = id === undefined;
 
   const tickets = useAppSelector(state => state.ticket.entities);
+  const users = useAppSelector(state => state.userManagement.users);
   const messageEntity = useAppSelector(state => state.message.entity);
   const loading = useAppSelector(state => state.message.loading);
   const updating = useAppSelector(state => state.message.updating);
@@ -39,6 +42,7 @@ export const MessageUpdate = () => {
     }
 
     dispatch(getTickets({}));
+    dispatch(getUsers({}));
   }, []);
 
   useEffect(() => {
@@ -48,10 +52,13 @@ export const MessageUpdate = () => {
   }, [updateSuccess]);
 
   const saveEntity = values => {
+    values.sentAt = convertDateTimeToServer(values.sentAt);
+
     const entity = {
       ...messageEntity,
       ...values,
       ticket: tickets.find(it => it.id.toString() === values.ticket.toString()),
+      sentBy: users.find(it => it.id.toString() === values.sentBy.toString()),
     };
 
     if (isNew) {
@@ -63,10 +70,14 @@ export const MessageUpdate = () => {
 
   const defaultValues = () =>
     isNew
-      ? {}
+      ? {
+          sentAt: displayDefaultDateTime(),
+        }
       : {
           ...messageEntity,
+          sentAt: convertDateTimeFromServer(messageEntity.sentAt),
           ticket: messageEntity?.ticket?.id,
+          sentBy: messageEntity?.sentBy?.id,
         };
 
   return (
@@ -105,6 +116,17 @@ export const MessageUpdate = () => {
                 }}
               />
               <ValidatedField
+                label={translate('ticketsManagementApp.message.sentAt')}
+                id="message-sentAt"
+                name="sentAt"
+                data-cy="sentAt"
+                type="datetime-local"
+                placeholder="YYYY-MM-DD HH:mm"
+                validate={{
+                  required: { value: true, message: translate('entity.validation.required') },
+                }}
+              />
+              <ValidatedField
                 id="message-ticket"
                 name="ticket"
                 data-cy="ticket"
@@ -114,6 +136,22 @@ export const MessageUpdate = () => {
                 <option value="" key="0" />
                 {tickets
                   ? tickets.map(otherEntity => (
+                      <option value={otherEntity.id} key={otherEntity.id}>
+                        {otherEntity.id}
+                      </option>
+                    ))
+                  : null}
+              </ValidatedField>
+              <ValidatedField
+                id="message-sentBy"
+                name="sentBy"
+                data-cy="sentBy"
+                label={translate('ticketsManagementApp.message.sentBy')}
+                type="select"
+              >
+                <option value="" key="0" />
+                {users
+                  ? users.map(otherEntity => (
                       <option value={otherEntity.id} key={otherEntity.id}>
                         {otherEntity.id}
                       </option>

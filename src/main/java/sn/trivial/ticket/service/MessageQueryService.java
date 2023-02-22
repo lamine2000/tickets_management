@@ -95,10 +95,19 @@ public class MessageQueryService extends QueryService<Message> {
             if (criteria.getId() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getId(), Message_.id));
             }
+            if (criteria.getSentAt() != null) {
+                specification = specification.and(buildRangeSpecification(criteria.getSentAt(), Message_.sentAt));
+            }
             if (criteria.getTicketId() != null) {
                 specification =
                     specification.and(
                         buildSpecification(criteria.getTicketId(), root -> root.join(Message_.ticket, JoinType.LEFT).get(Ticket_.id))
+                    );
+            }
+            if (criteria.getSentById() != null) {
+                specification =
+                    specification.and(
+                        buildSpecification(criteria.getSentById(), root -> root.join(Message_.sentBy, JoinType.LEFT).get(User_.id))
                     );
             }
         }

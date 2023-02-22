@@ -1,6 +1,7 @@
 package sn.trivial.ticket.service.dto;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Objects;
 import javax.persistence.Lob;
 import javax.validation.constraints.*;
@@ -16,7 +17,12 @@ public class MessageDTO implements Serializable {
     @Lob
     private String content;
 
+    @NotNull
+    private Instant sentAt;
+
     private TicketDTO ticket;
+
+    private UserDTO sentBy;
 
     public Long getId() {
         return id;
@@ -34,12 +40,28 @@ public class MessageDTO implements Serializable {
         this.content = content;
     }
 
+    public Instant getSentAt() {
+        return sentAt;
+    }
+
+    public void setSentAt(Instant sentAt) {
+        this.sentAt = sentAt;
+    }
+
     public TicketDTO getTicket() {
         return ticket;
     }
 
     public void setTicket(TicketDTO ticket) {
         this.ticket = ticket;
+    }
+
+    public UserDTO getSentBy() {
+        return sentBy;
+    }
+
+    public void setSentBy(UserDTO sentBy) {
+        this.sentBy = sentBy;
     }
 
     @Override
@@ -69,7 +91,9 @@ public class MessageDTO implements Serializable {
         return "MessageDTO{" +
             "id=" + getId() +
             ", content='" + getContent() + "'" +
+            ", sentAt='" + getSentAt() + "'" +
             ", ticket=" + getTicket() +
+            ", sentBy=" + getSentBy() +
             "}";
     }
 }

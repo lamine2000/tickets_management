@@ -2,3 +2,10 @@ src/main/java/sn/trivial/ticket/repository/ClientRepository.java skip
 src/main/java/sn/trivial/ticket/service/impl/TicketServiceImpl.java skip
 src/main/java/sn/trivial/ticket/service/ClientService.java skip
 src/main/java/sn/trivial/ticket/service/impl/ClientServiceImpl.java skip
+src/main/java/sn/trivial/ticket/repository/TicketRepository.java skip
+src/main/java/sn/trivial/ticket/service/TicketService.java skip
+src/main/java/sn/trivial/ticket/web/rest/TicketResource.java skip
+src/main/java/sn/trivial/ticket/repository/AgentRepository.java skip
+src/main/java/sn/trivial/ticket/service/AgentService.java skip
+src/main/java/sn/trivial/ticket/service/impl/AgentServiceImpl.java skip
+src/main/java/sn/trivial/ticket/web/rest/MessageResource.java skip

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Table } from 'reactstrap';
-import { byteSize, Translate, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
+import { byteSize, Translate, TextFormat, getSortState, JhiPagination, JhiItemCount } from 'react-jhipster';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { APP_DATE_FORMAT, APP_LOCAL_DATE_FORMAT } from 'app/config/constants';
@@ -108,8 +108,14 @@ export const Message = () => {
                 <th className="hand" onClick={sort('content')}>
                   <Translate contentKey="ticketsManagementApp.message.content">Content</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
+                <th className="hand" onClick={sort('sentAt')}>
+                  <Translate contentKey="ticketsManagementApp.message.sentAt">Sent At</Translate> <FontAwesomeIcon icon="sort" />
+                </th>
                 <th>
                   <Translate contentKey="ticketsManagementApp.message.ticket">Ticket</Translate> <FontAwesomeIcon icon="sort" />
+                </th>
+                <th>
+                  <Translate contentKey="ticketsManagementApp.message.sentBy">Sent By</Translate> <FontAwesomeIcon icon="sort" />
                 </th>
                 <th />
               </tr>
@@ -123,7 +129,9 @@ export const Message = () => {
                     </Button>
                   </td>
                   <td>{message.content}</td>
+                  <td>{message.sentAt ? <TextFormat type="date" value={message.sentAt} format={APP_DATE_FORMAT} /> : null}</td>
                   <td>{message.ticket ? <Link to={`/ticket/${message.ticket.id}`}>{message.ticket.id}</Link> : ''}</td>
+                  <td>{message.sentBy ? message.sentBy.id : ''}</td>
                   <td className="text-end">
                     <div className="btn-group flex-btn-group-container">
                       <Button tag={Link} to={`/message/${message.id}`} color="info" size="sm" data-cy="entityDetailsButton">
