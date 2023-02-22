@@ -1,6 +1,7 @@
 package sn.trivial.ticket.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.persistence.criteria.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import sn.trivial.ticket.service.criteria.MessageCriteria;
 import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.service.mapper.MessageMapper;
 import tech.jhipster.service.QueryService;
+import tech.jhipster.service.filter.LongFilter;
 
 /**
  * Service for executing complex queries for {@link Message} entities in the database.
@@ -33,9 +35,12 @@ public class MessageQueryService extends QueryService<Message> {
 
     private final MessageMapper messageMapper;
 
-    public MessageQueryService(MessageRepository messageRepository, MessageMapper messageMapper) {
+    private final TicketService ticketService;
+
+    public MessageQueryService(MessageRepository messageRepository, MessageMapper messageMapper, TicketService ticketService) {
         this.messageRepository = messageRepository;
         this.messageMapper = messageMapper;
+        this.ticketService = ticketService;
     }
 
     /**
@@ -98,5 +103,30 @@ public class MessageQueryService extends QueryService<Message> {
             }
         }
         return specification;
+    }
+
+    /* CUSTOM */
+
+    /**
+     * Return a {@link Page} of {@link MessageDTO} which matches the ticket Id from the database.
+     * @param ticketId the id of the ticket.
+     * @return the matching entities.
+     */
+    @Transactional(readOnly = true)
+    public List<MessageDTO> findByCriteriaAndTicketID(Long ticketId) {
+        log.debug("find by ticket Id: {}", ticketId);
+        MessageCriteria criteria = new MessageCriteria();
+        LongFilter ticketIdFilter = new LongFilter();
+        ticketIdFilter.setEquals(ticketId);
+        criteria.setTicketId(ticketIdFilter);
+
+        final Specification<Message> specification = createSpecification(criteria);
+
+        return messageRepository
+            .findAll(specification)
+            .stream()
+            .filter(message -> ticketService.isIssuedByConnectedUser(message.getTicket().getId()))
+            .map(messageMapper::toDto)
+            .collect(Collectors.toList());
     }
 }

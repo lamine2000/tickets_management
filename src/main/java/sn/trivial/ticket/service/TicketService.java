@@ -89,4 +89,30 @@ public interface TicketService {
      * @return the persisted entity.
      */
     TicketDTO changeTicketStatusByClient(ChangeTicketStatusVM changeTicketStatusVM);
+
+    /**
+     * Tells if the "clientId" client is the owner of the "ticketId" ticket.
+     *
+     * @param ticketId the tickets's id.
+     * @param clienId the client's id.
+     * @return true if the client is the owner or else, false.
+     */
+    Boolean isIssuedBySpecificClient(Long ticketId, Long clienId);
+
+    /**
+     * Tells if the "userId" user is the owner of the "ticketId" ticket.
+     *
+     * @param ticketId the tickets's id.
+     * @param userId the user's id.
+     * @return true if the user is the owner or else, false.
+     */
+    Boolean isIssuedBySpecificUser(Long ticketId, Long userId);
+
+    /**
+     * Tells if the connected user is the owner of the "ticketId" ticket.
+     *
+     * @param ticketId the tickets's id.
+     * @return true if the user is the owner or else, false.
+     */
+    Boolean isIssuedByConnectedUser(Long ticketId);
 }

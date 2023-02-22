@@ -16,12 +16,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import sn.trivial.ticket.domain.Message;
 import sn.trivial.ticket.repository.MessageRepository;
 import sn.trivial.ticket.service.MessageQueryService;
 import sn.trivial.ticket.service.MessageService;
 import sn.trivial.ticket.service.criteria.MessageCriteria;
 import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
+import tech.jhipster.service.filter.LongFilter;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -199,5 +201,20 @@ public class MessageResource {
             .noContent()
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
+    }
+
+    /* Custom */
+    /**
+     * {@code POST  /messages/tickets/{ticketId}/clients} : Get all messages of one ticket in chronological order.
+     *
+     * @param id the id of the ticket.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of messages in body.
+     */
+    @GetMapping("/messages/tickets/{id}/clients")
+    public ResponseEntity<List<MessageDTO>> getDiscussionOfOneTicket(@PathVariable Long id) {
+        log.debug("REST request to get all messages of one ticket in chronological order");
+
+        List<MessageDTO> result = messageQueryService.findByCriteriaAndTicketID(id);
+        return ResponseEntity.ok().body(result);
     }
 }

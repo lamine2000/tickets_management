@@ -224,11 +224,7 @@ public class TicketServiceImpl implements TicketService {
         );
 
         //check if the ticket has been created by the requester
-        Long connectedUserId = userService.getUserWithAuthorities().get().getId();
-        Long ticketOwnerClientId = optionalTicketDTO.get().getIssuedBy().getId();
-        Long ticketOwnerUserId = clientService.findOne(ticketOwnerClientId).get().getUser().getId();
-
-        if (!ticketOwnerUserId.equals(connectedUserId)) throw new BadRequestAlertException(
+        if (!isIssuedByConnectedUser(ticketId)) throw new BadRequestAlertException(
             String.format("Not allowed action. The requester is not the owner of the Ticket: %d", ticketId),
             "ticket",
             "ticketnotowned"
@@ -239,5 +235,30 @@ public class TicketServiceImpl implements TicketService {
         ticketDTO.setStatus(newStatus);
         Ticket ticket = ticketMapper.toEntity(ticketDTO);
         return ticketMapper.toDto(ticketRepository.save(ticket));
+    }
+
+    @Override
+    public Boolean isIssuedBySpecificClient(Long ticketId, Long clienId) {
+        Optional<TicketDTO> optionalTicketDTO = this.findOne(ticketId);
+        if (optionalTicketDTO.isEmpty()) return false;
+
+        Long ticketOwnerClientId = optionalTicketDTO.get().getIssuedBy().getId();
+        return ticketOwnerClientId.equals(clienId);
+    }
+
+    @Override
+    public Boolean isIssuedBySpecificUser(Long ticketId, Long userId) {
+        Optional<TicketDTO> optionalTicketDTO = this.findOne(ticketId);
+        if (optionalTicketDTO.isEmpty()) return false;
+
+        Long ticketOwnerClientId = optionalTicketDTO.get().getIssuedBy().getId();
+        Long ticketOwnerUserId = clientService.findOne(ticketOwnerClientId).get().getUser().getId();
+        return ticketOwnerUserId.equals(userId);
+    }
+
+    @Override
+    public Boolean isIssuedByConnectedUser(Long ticketId) {
+        Long connectedUserId = userService.getUserWithAuthorities().get().getId();
+        return isIssuedBySpecificUser(ticketId, connectedUserId);
     }
 }
