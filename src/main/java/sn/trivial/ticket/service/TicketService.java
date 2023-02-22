@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
 import sn.trivial.ticket.web.rest.vm.TicketAndMessageVM;
+import sn.trivial.ticket.web.rest.vm.TicketIdAndMessageContentVM;
 
 /**
  * Service Interface for managing {@link sn.trivial.ticket.domain.Ticket}.
@@ -69,7 +71,7 @@ public interface TicketService {
     /**
      * Save a ticket issued by the currently connected Client.
      *
-     * @param ticketDTO the entity to save.
+     * @param ticketAndMessageVM the ticket and message to be saved.
      * @return the persisted entity.
      */
     TicketDTO saveWithConnectedClient(TicketAndMessageVM ticketAndMessageVM);
@@ -115,4 +117,21 @@ public interface TicketService {
      * @return true if the user is the owner or else, false.
      */
     Boolean isIssuedByConnectedUser(Long ticketId);
+
+    /**
+     * Tells if it is to a client turn to send a message (in contrario to an Agent/Admin turn).
+     *
+     * @param ticketId the tickets's id.
+     * @return true if it is to a client turn to send a message or else, false.
+     */
+
+    Boolean isClientTurn(Long ticketId);
+
+    /**
+     * Create a new message linked to a ticket issued by the connected client.
+     *
+     * @param ticketIdAndMessageContentVM the ticket id and message content of the message to create.
+     * @return the persisted entity.
+     */
+    MessageDTO sendMessageByConnectedClient(TicketIdAndMessageContentVM ticketIdAndMessageContentVM);
 }

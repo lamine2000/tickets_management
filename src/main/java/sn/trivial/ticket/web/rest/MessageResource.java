@@ -205,7 +205,7 @@ public class MessageResource {
 
     /* Custom */
     /**
-     * {@code POST  /messages/tickets/{ticketId}/clients} : Get all messages of one ticket in chronological order.
+     * {@code POST  /messages/tickets/{id}/clients} : Get all messages of the "id" ticket in chronological order.
      *
      * @param id the id of the ticket.
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of messages in body.

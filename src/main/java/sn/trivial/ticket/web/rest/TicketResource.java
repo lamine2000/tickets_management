@@ -25,6 +25,7 @@ import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
 import sn.trivial.ticket.web.rest.vm.TicketAndMessageVM;
+import sn.trivial.ticket.web.rest.vm.TicketIdAndMessageContentVM;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -275,4 +276,25 @@ public class TicketResource {
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
+
+    /**
+     * {@code POST  /tickets/{id}/send-message/clients : Create a new message linked to a ticket issued by the connected client.
+     *
+     * @param ticketIdAndMessageContentVM the ticket id and message content of the message to create.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new messageDTO, or with status {@code 400 (Bad Request)}.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PostMapping("/tickets/{id}/send-message/clients")
+    public ResponseEntity<MessageDTO> sendMessageByConnectedClient(
+        @Valid @RequestBody TicketIdAndMessageContentVM ticketIdAndMessageContentVM
+    ) throws URISyntaxException {
+        log.debug("REST request to save Message linked to a ticket issued by the connected client: {}", ticketIdAndMessageContentVM);
+
+        MessageDTO result = ticketService.sendMessageByConnectedClient(ticketIdAndMessageContentVM);
+        return ResponseEntity
+            .created(new URI("/tickets/{id}/send-message/clients" + result.getId() + "/clients"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
+    //TODO: Test that endpoint
 }

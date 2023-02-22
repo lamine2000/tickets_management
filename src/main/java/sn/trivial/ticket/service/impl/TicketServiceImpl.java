@@ -3,6 +3,7 @@ package sn.trivial.ticket.service.impl;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -27,6 +28,7 @@ import sn.trivial.ticket.service.mapper.UserMapper;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
 import sn.trivial.ticket.web.rest.vm.TicketAndMessageVM;
+import sn.trivial.ticket.web.rest.vm.TicketIdAndMessageContentVM;
 
 /**
  * Service Implementation for managing {@link Ticket}.
@@ -262,5 +264,55 @@ public class TicketServiceImpl implements TicketService {
     public Boolean isIssuedByConnectedUser(Long ticketId) {
         Long connectedUserId = userService.getUserWithAuthorities().get().getId();
         return isIssuedBySpecificUser(ticketId, connectedUserId);
+    }
+
+    @Override
+    public Boolean isClientTurn(Long ticketId) {
+        //check if the ticket exists
+        Optional<TicketDTO> optionalTicketDTO = findOne(ticketId);
+
+        if (optionalTicketDTO.isEmpty()) return false;
+
+        //check if the ticket's current status allows a client to send a message
+        return Stream
+            .of(TicketStatus.TREATED, TicketStatus.PENDING)
+            .anyMatch(allowedStatus -> optionalTicketDTO.get().getStatus().equals(allowedStatus));
+    }
+
+    @Override
+    public MessageDTO sendMessageByConnectedClient(TicketIdAndMessageContentVM ticketIdAndMessageContentVM) {
+        log.debug("Request to send a message by the connected client " + "to an owned by the ticket: {}", ticketIdAndMessageContentVM);
+
+        Long ticketId = ticketIdAndMessageContentVM.getTicketId();
+        String messageContent = ticketIdAndMessageContentVM.getMessageContent();
+
+        //check if the ticket exists and issued/owned by connected client
+        Optional<TicketDTO> optionalTicketDTO = findOneTicketOfConnectedClient(ticketId);
+        if (optionalTicketDTO.isEmpty()) throw new BadRequestAlertException(
+            String.format("Ticket %d not found or not issued by requester", ticketId),
+            "message",
+            "ticketnotfound"
+        );
+
+        //check if it is the client turn to send a message
+        if (!isClientTurn(ticketId)) throw new BadRequestAlertException(
+            String.format("It is not to the connected client's turn to send a message on the ticket: %s", ticketId),
+            "message",
+            "notclientturn"
+        );
+
+        //effectively persist the message
+        User user = userService.getUserWithAuthorities().get();
+        MessageDTO messageDTO = new MessageDTO();
+        messageDTO.setContent(messageContent);
+        messageDTO.setSentAt(Instant.now());
+        messageDTO.setSentBy(userMapper.toDtoLogin(user));
+        messageDTO.setTicket(optionalTicketDTO.get());
+
+        TicketDTO ticketDTO = optionalTicketDTO.get();
+        ticketDTO.setStatus(TicketStatus.BEING_TREATED);
+
+        save(ticketDTO);
+        return messageService.save(messageDTO);
     }
 }
