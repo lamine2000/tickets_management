@@ -29,8 +29,8 @@ import sn.trivial.ticket.service.mapper.TicketMapper;
 import sn.trivial.ticket.service.mapper.UserMapper;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
-import sn.trivial.ticket.web.rest.vm.TicketAndMessageVM;
 import sn.trivial.ticket.web.rest.vm.TicketIdAndMessageContentVM;
+import sn.trivial.ticket.web.rest.vm.TicketIssueDescriptionAndMessageVM;
 
 /**
  * Service Implementation for managing {@link Ticket}.
@@ -163,6 +163,10 @@ public class TicketServiceImpl implements TicketService {
             adminUserDTO.setActivated(true);
 
             AgentDTO na = new AgentDTO();
+            na.setFirstName("no_agent");
+            na.setLastName("no_agent");
+            na.setEmail("no_agent@no_agent.com");
+
             User newUser = userService.registerUser(adminUserDTO, UUID.randomUUID().toString());
             na.setUser(userMapper.toDtoLogin(newUser));
             noAgent = Optional.of(agentService.save(na));
