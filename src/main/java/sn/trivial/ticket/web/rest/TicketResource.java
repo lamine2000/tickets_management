@@ -281,7 +281,7 @@ public class TicketResource {
     /**
      * {@code POST  /tickets/{id}/send-message/clients : Create a new message linked to a ticket issued by the connected client.
      *
-     * @param ticketIdAndMessageContentVM the ticket id and message content of the message to create.
+     * @param id the ticket id and messageContent content of the message to create.
      * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new messageDTO, or with status {@code 400 (Bad Request)}.
      * @throws URISyntaxException if the Location URI syntax is incorrect.
      */
