@@ -90,6 +90,7 @@ public class SecurityConfiguration {
             .antMatchers("/api/tickets/change-status").hasAuthority(AuthoritiesConstants.CLIENT)
             .regexMatchers("/api/tickets/\\d+/send-message/clients").hasAuthority(AuthoritiesConstants.CLIENT)
             .antMatchers("/api/tickets/unassigned").hasAnyAuthority(AuthoritiesConstants.AGENT, AuthoritiesConstants.ADMIN)
+            .regexMatchers("/api/tickets/\\d+/self-assign").hasAnyAuthority(AuthoritiesConstants.AGENT, AuthoritiesConstants.ADMIN)
         /***********END CUSTOM***********/
             .antMatchers("/api/**").authenticated()
 

@@ -331,4 +331,29 @@ public class TicketServiceImpl implements TicketService {
             .map(ticketMapper::toDto)
             .collect(Collectors.toList());
     }
+
+    @Override
+    public TicketDTO selfAssignTicket(Long ticketId) {
+        log.debug("Request to self assign ticket: {}", ticketId);
+
+        //check if the ticket exists and is unassigned
+        Optional<TicketDTO> optionalTicketDTO = findAllUnassigned()
+            .stream()
+            .filter(ticketDTO -> ticketDTO.getId().equals(ticketId))
+            .findFirst();
+
+        if (optionalTicketDTO.isEmpty()) throw new BadRequestAlertException(
+            String.format("Ticket %d not found or already assigned", ticketId),
+            "ticket",
+            "ticketnotfound"
+        );
+
+        //effectively assign the ticket
+        TicketDTO ticketDTO = optionalTicketDTO.get();
+        User user = userService.getUserWithAuthorities().get();
+        ticketDTO.setAssignedTo(agentService.findByUser_Login(user.getLogin()).get());
+        ticketDTO.setStatus(TicketStatus.PENDING);
+
+        return save(ticketDTO);
+    }
 }

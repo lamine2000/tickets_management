@@ -311,4 +311,20 @@ public class TicketResource {
         List<TicketDTO> tickets = ticketService.findAllUnassigned();
         return ResponseEntity.ok().body(tickets);
     }
+
+    /**
+     * {@code GET  /tickets/self-assign} : Self assign a ticket.
+     *
+     * @param id the ticket id.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the ticket in body.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/{id}/self-assign")
+    public ResponseEntity<TicketDTO> selfAssignTicket(@PathVariable Long id) throws URISyntaxException {
+        log.debug("REST request to get the unassigned tickets");
+        TicketDTO ticketDTO = ticketService.selfAssignTicket(id);
+        return ResponseEntity
+            .created(new URI("/api/tickets/" + ticketDTO.getId() + "/self-assign"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, ticketDTO.getId().toString()))
+            .body(ticketDTO);
+    }
 }

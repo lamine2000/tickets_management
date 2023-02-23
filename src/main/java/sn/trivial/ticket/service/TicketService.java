@@ -141,4 +141,12 @@ public interface TicketService {
      * @return the list of entities.
      */
     List<TicketDTO> findAllUnassigned();
+
+    /**
+     * Self assign a ticket.
+     *
+     * @param ticketId the id of the entity.
+     * @return the entity.
+     */
+    TicketDTO selfAssignTicket(Long ticketId);
 }

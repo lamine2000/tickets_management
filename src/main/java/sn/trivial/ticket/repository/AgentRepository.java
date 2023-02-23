@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import sn.trivial.ticket.domain.Agent;
+import sn.trivial.ticket.service.dto.AgentDTO;
 
 /**
  * Spring Data JPA repository for the Agent entity.
