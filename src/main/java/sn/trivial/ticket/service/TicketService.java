@@ -134,4 +134,11 @@ public interface TicketService {
      * @return the persisted entity.
      */
     MessageDTO sendMessageByConnectedClient(TicketIdAndMessageContentVM ticketIdAndMessageContentVM);
+
+    /**
+     * Get all the unassigned tickets.
+     *
+     * @return the list of entities.
+     */
+    List<TicketDTO> findAllUnassigned();
 }

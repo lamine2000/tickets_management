@@ -320,4 +320,15 @@ public class TicketServiceImpl implements TicketService {
         save(ticketDTO);
         return messageService.save(messageDTO);
     }
+
+    @Override
+    public List<TicketDTO> findAllUnassigned() {
+        log.debug("Request to get all the unassigned tickets");
+        return ticketRepository
+            .findAll()
+            .stream()
+            .filter(ticket -> ticket.getStatus().equals(TicketStatus.RECEIVED))
+            .map(ticketMapper::toDto)
+            .collect(Collectors.toList());
+    }
 }

@@ -87,8 +87,9 @@ public class SecurityConfiguration {
         /***********BEGIN CUSTOM***********/
             .antMatchers("/api/tickets/clients/**").hasAuthority(AuthoritiesConstants.CLIENT)
             .regexMatchers("/api/tickets/\\d+/clients/*").hasAuthority(AuthoritiesConstants.CLIENT)
-            .antMatchers("/api/tickets/change-status").hasAnyAuthority(AuthoritiesConstants.CLIENT)
-            .regexMatchers("/api/tickets/\\d+/send-message/clients/?").hasAnyAuthority(AuthoritiesConstants.CLIENT)
+            .antMatchers("/api/tickets/change-status").hasAuthority(AuthoritiesConstants.CLIENT)
+            .regexMatchers("/api/tickets/\\d+/send-message/clients").hasAuthority(AuthoritiesConstants.CLIENT)
+            .antMatchers("/api/tickets/unassigned").hasAnyAuthority(AuthoritiesConstants.AGENT, AuthoritiesConstants.ADMIN)
         /***********END CUSTOM***********/
             .antMatchers("/api/**").authenticated()
 
