@@ -143,10 +143,24 @@ public interface TicketService {
     List<TicketDTO> findAllUnassigned();
 
     /**
+     * Get all the tickets assigned to the connected admin.
+     *
+     * @return the list of entities.
+     */
+    List<TicketDTO> findAllAssigned();
+
+    /**
      * Self assign a ticket.
      *
      * @param ticketId the id of the entity.
      * @return the entity.
      */
     TicketDTO selfAssignTicket(Long ticketId);
+
+    /**
+     * Get all the tickets assigned to the connected agent.
+     *
+     * @return the list of entities.
+     */
+    List<TicketDTO> findAllAssignedToConnectedAgent();
 }

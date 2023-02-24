@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
@@ -333,6 +334,15 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public List<TicketDTO> findAllAssigned() {
+        log.debug("Request to get all the assigned tickets");
+        Predicate<Ticket> isAssignedPredicate = ticket ->
+            !ticket.getStatus().equals(TicketStatus.RECEIVED) && !ticket.getStatus().equals(TicketStatus.CLOSED);
+
+        return ticketRepository.findAll().stream().filter(isAssignedPredicate).map(ticketMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
     public TicketDTO selfAssignTicket(Long ticketId) {
         log.debug("Request to self assign ticket: {}", ticketId);
 
@@ -355,5 +365,19 @@ public class TicketServiceImpl implements TicketService {
         ticketDTO.setStatus(TicketStatus.PENDING);
 
         return save(ticketDTO);
+    }
+
+    @Override
+    public List<TicketDTO> findAllAssignedToConnectedAgent() {
+        log.debug("Request to get all the assigned tickets to the connected agent");
+        User user = userService.getUserWithAuthorities().get();
+
+        return findAllAssigned()
+            .stream()
+            .filter(ticketDTO -> {
+                Long agentId = ticketDTO.getAssignedTo().getId();
+                return agentService.findOne(agentId).get().getUser().getLogin().equals(user.getLogin());
+            })
+            .collect(Collectors.toList());
     }
 }
