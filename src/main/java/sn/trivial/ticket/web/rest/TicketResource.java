@@ -339,4 +339,16 @@ public class TicketResource {
         List<TicketDTO> tickets = ticketService.findAllAssignedToConnectedAgent();
         return ResponseEntity.ok().body(tickets);
     }
+
+    /**
+     * {@code GET  /tickets/:id/assigned} : Get the "id" ticket if assigned to the connected Agent.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the ticket in body.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/{id}/assigned")
+    public ResponseEntity<TicketDTO> getSpecificAssignedToConnectedAgent(@PathVariable Long id) {
+        log.debug("REST request to get a specific ticket assigned to the connected Agent. ticketId: {}", id);
+        Optional<TicketDTO> ticket = ticketService.findSpecificAssignedToConnectedAgent(id);
+        return ResponseUtil.wrapOrNotFound(ticket);
+    }
 }

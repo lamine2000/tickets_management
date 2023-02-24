@@ -163,4 +163,12 @@ public interface TicketService {
      * @return the list of entities.
      */
     List<TicketDTO> findAllAssignedToConnectedAgent();
+
+    /**
+     * Get the "id" ticket if it has been assigned to the connected agent.
+     *
+     * @param ticketId the id of the entity.
+     * @return the entity.
+     */
+    Optional<TicketDTO> findSpecificAssignedToConnectedAgent(Long ticketId);
 }

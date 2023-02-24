@@ -380,4 +380,20 @@ public class TicketServiceImpl implements TicketService {
             })
             .collect(Collectors.toList());
     }
+
+    @Override
+    public Optional<TicketDTO> findSpecificAssignedToConnectedAgent(Long ticketId) {
+        log.debug("Request to get a specific assigned ticket to the connected agent. ticketId: {}", ticketId);
+        Optional<TicketDTO> optionalTicketDTO = findOne(ticketId);
+        if (optionalTicketDTO.isEmpty()) return Optional.empty();
+
+        TicketDTO ticketDTO = optionalTicketDTO.get();
+        Long agentId = ticketDTO.getAssignedTo().getId();
+        User user = userService.getUserWithAuthorities().get();
+
+        return agentService
+            .findOne(agentId)
+            .filter(agentDTO -> agentDTO.getUser().getLogin().equals(user.getLogin()))
+            .map(agentDTO -> ticketDTO);
+    }
 }
