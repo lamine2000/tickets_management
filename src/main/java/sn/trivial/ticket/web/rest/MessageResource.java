@@ -16,14 +16,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import sn.trivial.ticket.domain.Message;
 import sn.trivial.ticket.repository.MessageRepository;
 import sn.trivial.ticket.service.MessageQueryService;
 import sn.trivial.ticket.service.MessageService;
 import sn.trivial.ticket.service.criteria.MessageCriteria;
 import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
-import tech.jhipster.service.filter.LongFilter;
 import tech.jhipster.web.util.HeaderUtil;
 import tech.jhipster.web.util.PaginationUtil;
 import tech.jhipster.web.util.ResponseUtil;
@@ -211,10 +209,24 @@ public class MessageResource {
      * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of messages in body.
      */
     @GetMapping("/messages/tickets/{id}/clients")
-    public ResponseEntity<List<MessageDTO>> getDiscussionOfOneTicket(@PathVariable Long id) {
+    public ResponseEntity<List<MessageDTO>> getDiscussionOfOneTicketOfClient(@PathVariable Long id) {
         log.debug("REST request to get all messages of one ticket in chronological order");
 
-        List<MessageDTO> result = messageQueryService.findByCriteriaAndTicketID(id);
+        List<MessageDTO> result = messageQueryService.findByCriteriaAndTicketIdForClient(id);
+        return ResponseEntity.ok().body(result);
+    }
+
+    /**
+     * {@code POST  /messages/tickets/{id}/agents} : Get all messages of the "id" ticket in chronological order.
+     *
+     * @param id the id of the ticket.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of messages in body.
+     */
+    @GetMapping("/messages/tickets/{id}/agents")
+    public ResponseEntity<List<MessageDTO>> getDiscussionOfOneTicketOfAgent(@PathVariable Long id) {
+        log.debug("REST request to get all messages of one ticket in chronological order");
+
+        List<MessageDTO> result = messageQueryService.findByCriteriaAndTicketIdForAgent(id);
         return ResponseEntity.ok().body(result);
     }
 }

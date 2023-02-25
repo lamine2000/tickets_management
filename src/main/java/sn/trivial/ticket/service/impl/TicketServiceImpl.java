@@ -267,9 +267,25 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public Boolean isAssignedToSpecificUser(Long ticketId, Long userId) {
+        Optional<TicketDTO> optionalTicketDTO = this.findOne(ticketId);
+        if (optionalTicketDTO.isEmpty()) return false;
+
+        Long ticketAssignedToAgentId = optionalTicketDTO.get().getAssignedTo().getId();
+        Long ticketAssignedToUserId = agentService.findOne(ticketAssignedToAgentId).get().getUser().getId();
+        return ticketAssignedToUserId.equals(userId);
+    }
+
+    @Override
     public Boolean isIssuedByConnectedUser(Long ticketId) {
         Long connectedUserId = userService.getUserWithAuthorities().get().getId();
         return isIssuedBySpecificUser(ticketId, connectedUserId);
+    }
+
+    @Override
+    public Boolean isAssignedToConnectedUser(Long ticketId) {
+        Long connectedUserId = userService.getUserWithAuthorities().get().getId();
+        return isAssignedToSpecificUser(ticketId, connectedUserId);
     }
 
     @Override

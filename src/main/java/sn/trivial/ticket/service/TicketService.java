@@ -111,6 +111,8 @@ public interface TicketService {
      */
     Boolean isIssuedBySpecificUser(Long ticketId, Long userId);
 
+    Boolean isAssignedToSpecificUser(Long ticketId, Long userId);
+
     /**
      * Tells if the connected user is the owner of the "ticketId" ticket.
      *
@@ -174,4 +176,6 @@ public interface TicketService {
     Optional<TicketDTO> findSpecificAssignedToConnectedAgent(Long ticketId);
 
     MessageDTO sendMessageByConnectedAgent(MessageContentAndNewTicketStatusVM messageContentAndNewTicketStatusVM);
+
+    Boolean isAssignedToConnectedUser(Long ticketId);
 }

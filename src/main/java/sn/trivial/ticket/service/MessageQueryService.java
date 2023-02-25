@@ -1,6 +1,7 @@
 package sn.trivial.ticket.service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.criteria.JoinType;
 import org.slf4j.Logger;
@@ -15,7 +16,9 @@ import sn.trivial.ticket.domain.Message;
 import sn.trivial.ticket.repository.MessageRepository;
 import sn.trivial.ticket.service.criteria.MessageCriteria;
 import sn.trivial.ticket.service.dto.MessageDTO;
+import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.service.mapper.MessageMapper;
+import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import tech.jhipster.service.QueryService;
 import tech.jhipster.service.filter.LongFilter;
 
@@ -122,7 +125,7 @@ public class MessageQueryService extends QueryService<Message> {
      * @return the matching entities.
      */
     @Transactional(readOnly = true)
-    public List<MessageDTO> findByCriteriaAndTicketID(Long ticketId) {
+    public List<MessageDTO> findByCriteriaAndTicketIdForClient(Long ticketId) {
         log.debug("find by ticket Id: {}", ticketId);
         MessageCriteria criteria = new MessageCriteria();
         LongFilter ticketIdFilter = new LongFilter();
@@ -137,5 +140,28 @@ public class MessageQueryService extends QueryService<Message> {
             .filter(message -> ticketService.isIssuedByConnectedUser(message.getTicket().getId()))
             .map(messageMapper::toDto)
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Return a {@link Page} of {@link MessageDTO} which matches the ticket Id from the database.
+     * @param ticketId the id of the ticket.
+     * @return the matching entities.
+     */
+    public List<MessageDTO> findByCriteriaAndTicketIdForAgent(Long ticketId) {
+        log.debug("find by ticket Id: {}", ticketId);
+        MessageCriteria criteria = new MessageCriteria();
+        LongFilter ticketIdFilter = new LongFilter();
+        ticketIdFilter.setEquals(ticketId);
+        criteria.setTicketId(ticketIdFilter);
+
+        final Specification<Message> specification = createSpecification(criteria);
+
+        Optional<TicketDTO> optionalTicketDTO = ticketService.findOne(ticketId);
+
+        if (optionalTicketDTO.isEmpty() || !ticketService.isAssignedToConnectedUser(optionalTicketDTO.get().getId())) {
+            throw new BadRequestAlertException("You are not allowed to access this ticket", "message", "notAllowed");
+        }
+
+        return messageRepository.findAll(specification).stream().map(messageMapper::toDto).collect(Collectors.toList());
     }
 }
