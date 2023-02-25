@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
+import sn.trivial.ticket.web.rest.vm.MessageContentAndNewTicketStatusVM;
 import sn.trivial.ticket.web.rest.vm.TicketIdAndMessageContentVM;
 import sn.trivial.ticket.web.rest.vm.TicketIssueDescriptionAndMessageVM;
 
@@ -171,4 +172,6 @@ public interface TicketService {
      * @return the entity.
      */
     Optional<TicketDTO> findSpecificAssignedToConnectedAgent(Long ticketId);
+
+    MessageDTO sendMessageByConnectedAgent(MessageContentAndNewTicketStatusVM messageContentAndNewTicketStatusVM);
 }

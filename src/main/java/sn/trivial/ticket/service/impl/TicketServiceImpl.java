@@ -30,6 +30,7 @@ import sn.trivial.ticket.service.mapper.TicketMapper;
 import sn.trivial.ticket.service.mapper.UserMapper;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
+import sn.trivial.ticket.web.rest.vm.MessageContentAndNewTicketStatusVM;
 import sn.trivial.ticket.web.rest.vm.TicketIdAndMessageContentVM;
 import sn.trivial.ticket.web.rest.vm.TicketIssueDescriptionAndMessageVM;
 
@@ -226,9 +227,7 @@ public class TicketServiceImpl implements TicketService {
         allowedTransitions.put(TicketStatus.TREATED, TicketStatus.CLOSED);
         allowedTransitions.put(TicketStatus.TREATED, TicketStatus.BEING_TREATED);
 
-        if (
-            !allowedTransitions.containsKey(oldStatus) || !allowedTransitions.get(oldStatus).contains(newStatus)
-        ) throw new BadRequestAlertException(
+        if (!allowedTransitions.get(oldStatus).contains(newStatus)) throw new BadRequestAlertException(
             String.format("Transition not allowed to clients, from %s to %s on Ticket: %d", oldStatus, newStatus, ticketId),
             "ticket",
             "transitionnotallowed"
@@ -337,7 +336,9 @@ public class TicketServiceImpl implements TicketService {
     public List<TicketDTO> findAllAssigned() {
         log.debug("Request to get all the assigned tickets");
         Predicate<Ticket> isAssignedPredicate = ticket ->
-            !ticket.getStatus().equals(TicketStatus.RECEIVED) && !ticket.getStatus().equals(TicketStatus.CLOSED);
+            !ticket.getStatus().equals(TicketStatus.RECEIVED) &&
+            !ticket.getStatus().equals(TicketStatus.CLOSED) &&
+            !ticket.getStatus().equals(TicketStatus.DO_NOT_TREAT);
 
         return ticketRepository.findAll().stream().filter(isAssignedPredicate).map(ticketMapper::toDto).collect(Collectors.toList());
     }
@@ -395,5 +396,60 @@ public class TicketServiceImpl implements TicketService {
             .findOne(agentId)
             .filter(agentDTO -> agentDTO.getUser().getLogin().equals(user.getLogin()))
             .map(agentDTO -> ticketDTO);
+    }
+
+    @Override
+    public MessageDTO sendMessageByConnectedAgent(MessageContentAndNewTicketStatusVM messageContentAndNewTicketStatusVM) {
+        log.debug("Request to send a message by the connected agent linked to an assigned ticket: {}", messageContentAndNewTicketStatusVM);
+
+        //check if the ticket exists and is assigned to the connected agent
+        Long ticketId = messageContentAndNewTicketStatusVM.getTicketId();
+        Optional<TicketDTO> optionalTicketDTO = findSpecificAssignedToConnectedAgent(ticketId);
+
+        if (optionalTicketDTO.isEmpty()) throw new BadRequestAlertException(
+            String.format("Ticket %d not found or not assigned to the connected agent", ticketId),
+            "message",
+            "ticketnotfound"
+        );
+
+        //check if it is the agent turn to send a message
+        if (isClientTurn(ticketId)) throw new BadRequestAlertException(
+            String.format("It is not to the connected agent's turn to send a message on the ticket: %s", ticketId),
+            "message",
+            "notagentturn"
+        );
+
+        //check if the transition of statuses is valid
+        TicketDTO ticketDTO = optionalTicketDTO.get();
+        TicketStatus oldStatus = ticketDTO.getStatus();
+        TicketStatus newStatus = messageContentAndNewTicketStatusVM.getNewTicketStatus();
+
+        Multimap<TicketStatus, TicketStatus> allowedTransitions = ArrayListMultimap.create();
+        allowedTransitions.put(TicketStatus.BEING_TREATED, TicketStatus.PENDING);
+        allowedTransitions.put(TicketStatus.BEING_TREATED, TicketStatus.DO_NOT_TREAT);
+        allowedTransitions.put(TicketStatus.PENDING, TicketStatus.CLOSED);
+        allowedTransitions.put(TicketStatus.DO_NOT_TREAT, TicketStatus.CLOSED);
+        allowedTransitions.put(TicketStatus.TREATED, TicketStatus.CLOSED);
+
+        if (!allowedTransitions.get(oldStatus).contains(newStatus)) throw new BadRequestAlertException(
+            String.format("The transition of statuses from %s to %s is not allowed", oldStatus, newStatus),
+            "message",
+            "invalidtransition"
+        );
+
+        //effectively send the message
+        User user = userService.getUserWithAuthorities().get();
+        MessageDTO messageDTO = new MessageDTO();
+        String messageContent = messageContentAndNewTicketStatusVM.getMessageContent();
+
+        messageDTO.setContent(messageContent);
+        messageDTO.setSentAt(Instant.now());
+        messageDTO.setSentBy(userMapper.toDtoLogin(user));
+        messageDTO.setTicket(ticketDTO);
+
+        ticketDTO.setStatus(newStatus);
+
+        save(ticketDTO);
+        return messageService.save(messageDTO);
     }
 }

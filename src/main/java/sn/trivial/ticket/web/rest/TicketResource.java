@@ -25,6 +25,7 @@ import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.errors.BadRequestAlertException;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
+import sn.trivial.ticket.web.rest.vm.MessageContentAndNewTicketStatusVM;
 import sn.trivial.ticket.web.rest.vm.TicketIdAndMessageContentVM;
 import sn.trivial.ticket.web.rest.vm.TicketIssueDescriptionAndMessageVM;
 import tech.jhipster.web.util.HeaderUtil;
@@ -350,5 +351,31 @@ public class TicketResource {
         log.debug("REST request to get a specific ticket assigned to the connected Agent. ticketId: {}", id);
         Optional<TicketDTO> ticket = ticketService.findSpecificAssignedToConnectedAgent(id);
         return ResponseUtil.wrapOrNotFound(ticket);
+    }
+
+    /**
+     * {@code POST  /tickets/{id}/send-message/agents : Create a new message linked to a ticket assigned to the connected agent.
+     *
+     * @param id the ticket id and massageContentAndNewTicketStatusVM
+     * a view model representing the message content and the new status of the ticket.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new messageDTO, or with status {@code 400 (Bad Request)}.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
+    @PostMapping("/tickets/{id}/send-message/agents")
+    public ResponseEntity<MessageDTO> sendMessageByConnectedAgent(
+        @PathVariable Long id,
+        @Valid @RequestBody MessageContentAndNewTicketStatusVM messageContentAndNewTicketStatusVM
+    ) throws URISyntaxException {
+        messageContentAndNewTicketStatusVM.setTicketId(id);
+        log.debug(
+            "REST request to save Message linked to a ticket assigned to the connected agent: {}",
+            messageContentAndNewTicketStatusVM
+        );
+
+        MessageDTO result = ticketService.sendMessageByConnectedAgent(messageContentAndNewTicketStatusVM);
+        return ResponseEntity
+            .created(new URI("/tickets/" + result.getId() + "/send-message/agents"))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
     }
 }
