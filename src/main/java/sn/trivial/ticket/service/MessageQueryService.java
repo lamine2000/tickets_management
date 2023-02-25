@@ -134,12 +134,11 @@ public class MessageQueryService extends QueryService<Message> {
 
         final Specification<Message> specification = createSpecification(criteria);
 
-        return messageRepository
-            .findAll(specification)
-            .stream()
-            .filter(message -> ticketService.isIssuedByConnectedUser(message.getTicket().getId()))
-            .map(messageMapper::toDto)
-            .collect(Collectors.toList());
+        if (!ticketService.isIssuedByConnectedUser(ticketId)) {
+            throw new BadRequestAlertException("You are not the owner of this ticket", "message", "notOwner");
+        }
+
+        return messageRepository.findAll(specification).stream().map(messageMapper::toDto).collect(Collectors.toList());
     }
 
     /**
