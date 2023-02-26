@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import sn.trivial.ticket.domain.enumeration.TicketStatus;
 import sn.trivial.ticket.service.dto.MessageDTO;
 import sn.trivial.ticket.service.dto.TicketDTO;
 import sn.trivial.ticket.web.rest.vm.ChangeTicketStatusVM;
@@ -97,7 +98,7 @@ public interface TicketService {
      * Tells if the "clientId" client is the owner of the "ticketId" ticket.
      *
      * @param ticketId the tickets's id.
-     * @param clienId the client's id.
+     * @param clienId  the client's id.
      * @return true if the client is the owner or else, false.
      */
     Boolean isIssuedBySpecificClient(Long ticketId, Long clienId);
@@ -106,7 +107,7 @@ public interface TicketService {
      * Tells if the "userId" user is the owner of the "ticketId" ticket.
      *
      * @param ticketId the tickets's id.
-     * @param userId the user's id.
+     * @param userId   the user's id.
      * @return true if the user is the owner or else, false.
      */
     Boolean isIssuedBySpecificUser(Long ticketId, Long userId);
@@ -195,16 +196,39 @@ public interface TicketService {
      * Assign a ticket to an agent.
      *
      * @param ticketId the id of the ticket.
-     * @param agentId the id of the agent.
+     * @param agentId  the id of the agent.
      * @return the entity.
      */
     TicketDTO assignTicketToAgent(Long ticketId, Long agentId);
 
     /**
-     * Get all the tickets assigned to the "agentId" agent.
+     * Get all the tickets assigned to the "agentId" agent and not closed.
      *
      * @param agentId the id of the agent.
      * @return the list of entities.
      */
     List<TicketDTO> findAllAssignedToAgent(Long agentId);
+
+    /**
+     * Get the number of tickets assigned to the "agentId" agent.
+     *
+     * @param agentId the id of the agent.
+     * @return the number of entities.
+     */
+    Long countAllAssignedToAgent(Long agentId);
+
+    /**
+     * Get the number of tickets assigned and not closed.
+     *
+     * @return the number of entities.
+     */
+    Long countAllAssigned();
+
+    /**
+     * Get all the tickets with the "ticketStatus" status.
+     *
+     * @param ticketStatus the status of the ticket.
+     * @return the list of entities.
+     */
+    List<TicketDTO> findAllByStatus(TicketStatus ticketStatus);
 }

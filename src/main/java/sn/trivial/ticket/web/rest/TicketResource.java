@@ -2,6 +2,7 @@ package sn.trivial.ticket.web.rest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import sn.trivial.ticket.domain.enumeration.TicketStatus;
 import sn.trivial.ticket.repository.TicketRepository;
 import sn.trivial.ticket.service.TicketQueryService;
 import sn.trivial.ticket.service.TicketService;
@@ -408,6 +410,60 @@ public class TicketResource {
     public ResponseEntity<List<TicketDTO>> getAllAssignedToAgent(@PathVariable Long id) {
         log.debug("REST request to get the tickets assigned to the {} Agent", id);
         List<TicketDTO> tickets = ticketService.findAllAssignedToAgent(id);
+        return ResponseEntity.ok().body(tickets);
+    }
+
+    /**
+     * {@code GET  /tickets/assigned/agents/:id/count} : Get the number of tickets that are assigned to the "id" Agent.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of tickets in body.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/assigned/agents/{id}/count")
+    public ResponseEntity<Long> countAllAssignedToAgent(@PathVariable Long id) {
+        log.debug("REST request to get the number of tickets assigned to the {} Agent", id);
+        Long count = ticketService.countAllAssignedToAgent(id);
+        return ResponseEntity.ok().body(count);
+    }
+
+    /**
+     * {@code GET  /tickets/assigned} : Get all the tickets that are assigned and not closed.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of tickets in body.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/assigned/any-agent")
+    public ResponseEntity<List<TicketDTO>> getAllAssigned() {
+        log.debug("REST request to get the assigned and not closed tickets to any Agent");
+        List<TicketDTO> tickets = ticketService.findAllAssigned();
+        return ResponseEntity.ok().body(tickets);
+    }
+
+    /**
+     * {@code GET  /tickets/assigned/count} : Get the number of tickets that are assigned and not closed.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of tickets in body.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/assigned/count")
+    public ResponseEntity<Long> countAllAssigned() {
+        log.debug("REST request to get the number of tickets assigned to the connected Agent");
+        Long count = ticketService.countAllAssigned();
+        return ResponseEntity.ok().body(count);
+    }
+
+    /**
+     * {@code GET  /tickets/status/:status} : Get all the tickets by status.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of tickets in body.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/status/{status}")
+    public ResponseEntity<List<TicketDTO>> getAllByStatus(@PathVariable String status) {
+        log.debug("REST request to get the tickets by status {}", status);
+        //check if the status is valid
+        if (
+            Arrays.stream(TicketStatus.values()).noneMatch(allowedStatus -> allowedStatus.name().equals(status.toUpperCase()))
+        ) throw new BadRequestAlertException("Invalid status", ENTITY_NAME, "invalidstatus");
+
+        TicketStatus ticketStatus = TicketStatus.valueOf(status.toUpperCase());
+        List<TicketDTO> tickets = ticketService.findAllByStatus(ticketStatus);
         return ResponseEntity.ok().body(tickets);
     }
 }

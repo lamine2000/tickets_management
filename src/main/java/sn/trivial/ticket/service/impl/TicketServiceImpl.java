@@ -339,6 +339,29 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public Long countAllAssignedToAgent(Long agentId) {
+        log.debug("Request to count all Tickets assigned to Agent : {}", agentId);
+
+        //return findAllAssignedToAgent(agentId).size();
+        return findAllAssigned().stream().filter(ticketDTO -> ticketDTO.getAssignedTo().getId().equals(agentId)).count();
+    }
+
+    @Override
+    public Long countAllAssigned() {
+        log.debug("Request to count all assigned and not closed Tickets");
+        Predicate<Ticket> isAssignedPredicate = ticket ->
+            !ticket.getStatus().equals(TicketStatus.RECEIVED) && !ticket.getStatus().equals(TicketStatus.CLOSED);
+
+        return ticketRepository.findAll().stream().filter(isAssignedPredicate).count();
+    }
+
+    @Override
+    public List<TicketDTO> findAllByStatus(TicketStatus ticketStatus) {
+        log.debug("Request to get all Tickets with status : {}", ticketStatus);
+        return ticketRepository.findAllByStatus(ticketStatus).stream().map(ticketMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
     public Boolean isClientTurn(Long ticketId) {
         //check if the ticket exists
         Optional<TicketDTO> optionalTicketDTO = findOne(ticketId);
@@ -402,9 +425,7 @@ public class TicketServiceImpl implements TicketService {
     public List<TicketDTO> findAllAssigned() {
         log.debug("Request to get all the assigned tickets");
         Predicate<Ticket> isAssignedPredicate = ticket ->
-            !ticket.getStatus().equals(TicketStatus.RECEIVED) &&
-            !ticket.getStatus().equals(TicketStatus.CLOSED) &&
-            !ticket.getStatus().equals(TicketStatus.DO_NOT_TREAT);
+            !ticket.getStatus().equals(TicketStatus.RECEIVED) && !ticket.getStatus().equals(TicketStatus.CLOSED);
 
         return ticketRepository.findAll().stream().filter(isAssignedPredicate).map(ticketMapper::toDto).collect(Collectors.toList());
     }

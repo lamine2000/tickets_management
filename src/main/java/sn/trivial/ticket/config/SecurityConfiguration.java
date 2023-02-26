@@ -96,6 +96,9 @@ public class SecurityConfiguration {
             .regexMatchers("/api/tickets/\\d+/send-message/agents").hasAuthority(AuthoritiesConstants.AGENT)
             .regexMatchers("/api/tickets/\\d+/admin/assign-agent/\\d+").hasAuthority(AuthoritiesConstants.ADMIN)
             .regexMatchers("/api/tickets/assigned/agents/\\d+").hasAuthority(AuthoritiesConstants.ADMIN)
+            .regexMatchers("/api/tickets/assigned/agents/\\d+/count").hasAuthority(AuthoritiesConstants.ADMIN)
+            .regexMatchers("/api/tickets/assigned/any-agent").hasAuthority(AuthoritiesConstants.ADMIN)
+            .regexMatchers("/api/tickets/status/\\w+").hasAuthority(AuthoritiesConstants.ADMIN)
 
             .regexMatchers("/api/messages/tickets/\\d+/clients").hasAuthority(AuthoritiesConstants.CLIENT)
             .regexMatchers("/api/messages/tickets/\\d+/agents").hasAuthority(AuthoritiesConstants.AGENT)
