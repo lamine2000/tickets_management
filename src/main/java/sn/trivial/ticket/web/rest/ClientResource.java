@@ -200,4 +200,20 @@ public class ClientResource {
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
     }
+
+    /*CUSTOM*/
+
+    //register a new Client
+    @PostMapping("/clients/register")
+    public ResponseEntity<ClientDTO> registerClient(@Valid @RequestBody ClientDTO clientDTO) throws URISyntaxException {
+        log.debug("REST request to save Client : {}", clientDTO);
+        if (clientDTO.getId() != null) {
+            throw new BadRequestAlertException("A new client cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        ClientDTO result = clientService.register(clientDTO);
+        return ResponseEntity
+            .created(new URI("/api/clients/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
 }

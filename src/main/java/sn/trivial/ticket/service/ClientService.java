@@ -71,4 +71,13 @@ public interface ClientService {
      * @return the entity.
      */
     Optional<ClientDTO> findByUser_Login(String login);
+
+    //register a new client
+    /**
+     * Register a new client.
+     *
+     * @param clientDTO the entity to save.
+     * @return the persisted entity.
+     */
+    ClientDTO register(ClientDTO clientDTO);
 }

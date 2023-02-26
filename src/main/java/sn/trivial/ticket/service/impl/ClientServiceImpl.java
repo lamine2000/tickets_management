@@ -1,6 +1,8 @@
 package sn.trivial.ticket.service.impl;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -8,10 +10,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sn.trivial.ticket.domain.Client;
+import sn.trivial.ticket.domain.User;
 import sn.trivial.ticket.repository.ClientRepository;
 import sn.trivial.ticket.service.ClientService;
+import sn.trivial.ticket.service.MailService;
+import sn.trivial.ticket.service.UserService;
+import sn.trivial.ticket.service.dto.AdminUserDTO;
 import sn.trivial.ticket.service.dto.ClientDTO;
+import sn.trivial.ticket.service.dto.UserDTO;
 import sn.trivial.ticket.service.mapper.ClientMapper;
+import sn.trivial.ticket.service.mapper.UserMapper;
 
 /**
  * Service Implementation for managing {@link Client}.
@@ -26,9 +34,24 @@ public class ClientServiceImpl implements ClientService {
 
     private final ClientMapper clientMapper;
 
-    public ClientServiceImpl(ClientRepository clientRepository, ClientMapper clientMapper) {
+    private final UserMapper userMapper;
+
+    private final UserService userService;
+
+    private final MailService mailService;
+
+    public ClientServiceImpl(
+        ClientRepository clientRepository,
+        ClientMapper clientMapper,
+        UserMapper userMapper,
+        UserService userService,
+        MailService mailService
+    ) {
         this.clientRepository = clientRepository;
         this.clientMapper = clientMapper;
+        this.userMapper = userMapper;
+        this.userService = userService;
+        this.mailService = mailService;
     }
 
     @Override
@@ -92,5 +115,26 @@ public class ClientServiceImpl implements ClientService {
         Optional<Client> optionalClient = clientRepository.findByUser_Login(login);
 
         return optionalClient.map(clientMapper::toDto);
+    }
+
+    @Override
+    public ClientDTO register(ClientDTO clientDTO) {
+        log.debug("Request to register Client : {}", clientDTO);
+
+        //save the user and then save the client
+        AdminUserDTO adminUserDTO = new AdminUserDTO();
+        UserDTO userDTO = clientDTO.getUser();
+        adminUserDTO.setFirstName(clientDTO.getFirstName());
+        adminUserDTO.setLastName(clientDTO.getLastName());
+        adminUserDTO.setEmail(clientDTO.getEmail());
+        adminUserDTO.setLogin(userDTO.getLogin());
+        adminUserDTO.setCreatedDate(Instant.now());
+        adminUserDTO.setAuthorities(Set.of("ROLE_CLIENT", "ROLE_USER"));
+        adminUserDTO.setLangKey("fr");
+
+        User newUser = userService.createUser(adminUserDTO);
+        mailService.sendCreationEmail(newUser);
+        clientDTO.setUser(userMapper.toDtoLogin(newUser));
+        return save(clientDTO);
     }
 }
