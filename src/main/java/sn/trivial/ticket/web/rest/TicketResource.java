@@ -398,4 +398,16 @@ public class TicketResource {
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
+
+    /**
+     * {@code GET  /tickets/assigned/agents/:id} : Get all the tickets that are assigned to the "id" Agent.
+     *
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of tickets in body.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    200 (OK)} and with body the ticketDTO, or with status {@code 404 (Not Found)}.
+     */
+    @GetMapping("/tickets/assigned/agents/{id}")
+    public ResponseEntity<List<TicketDTO>> getAllAssignedToAgent(@PathVariable Long id) {
+        log.debug("REST request to get the tickets assigned to the {} Agent", id);
+        List<TicketDTO> tickets = ticketService.findAllAssignedToAgent(id);
+        return ResponseEntity.ok().body(tickets);
+    }
 }

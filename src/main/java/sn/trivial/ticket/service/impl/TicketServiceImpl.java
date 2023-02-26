@@ -329,6 +329,16 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public List<TicketDTO> findAllAssignedToAgent(Long agentId) {
+        log.debug("Request to get all Tickets assigned to Agent : {}", agentId);
+
+        return findAllAssigned()
+            .stream()
+            .filter(ticketDTO -> ticketDTO.getAssignedTo().getId().equals(agentId))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public Boolean isClientTurn(Long ticketId) {
         //check if the ticket exists
         Optional<TicketDTO> optionalTicketDTO = findOne(ticketId);

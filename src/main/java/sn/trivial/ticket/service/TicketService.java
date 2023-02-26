@@ -199,4 +199,12 @@ public interface TicketService {
      * @return the entity.
      */
     TicketDTO assignTicketToAgent(Long ticketId, Long agentId);
+
+    /**
+     * Get all the tickets assigned to the "agentId" agent.
+     *
+     * @param agentId the id of the agent.
+     * @return the list of entities.
+     */
+    List<TicketDTO> findAllAssignedToAgent(Long agentId);
 }
