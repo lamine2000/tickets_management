@@ -178,4 +178,6 @@ public interface TicketService {
     MessageDTO sendMessageByConnectedAgent(MessageContentAndNewTicketStatusVM messageContentAndNewTicketStatusVM);
 
     Boolean isAssignedToConnectedUser(Long ticketId);
+
+    TicketDTO assignTicketToAgent(Long ticketId, Long agentId);
 }

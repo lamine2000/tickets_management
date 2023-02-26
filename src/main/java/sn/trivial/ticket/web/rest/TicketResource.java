@@ -378,4 +378,16 @@ public class TicketResource {
             .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
             .body(result);
     }
+
+    //assign ticket to an agent
+    @GetMapping("/tickets/{ticketId}/admin/assign-agent/{agentId}")
+    public ResponseEntity<TicketDTO> assignTicketToAgent(@PathVariable Long ticketId, @PathVariable Long agentId)
+        throws URISyntaxException {
+        log.debug("REST request to assign ticket to agent. ticket id: {}, agentId: {}", ticketId, agentId);
+        TicketDTO result = ticketService.assignTicketToAgent(ticketId, agentId);
+        return ResponseEntity
+            .created(new URI("/tickets/" + result.getId() + "/assign-agent/" + agentId))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
 }

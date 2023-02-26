@@ -289,6 +289,46 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
+    public TicketDTO assignTicketToAgent(Long ticketId, Long agentId) {
+        log.debug("Request to assign Ticket : {} to Agent : {}", ticketId, agentId);
+
+        //check if the ticket exists
+        Optional<TicketDTO> optionalTicketDTO = this.findOne(ticketId);
+        if (optionalTicketDTO.isEmpty()) throw new BadRequestAlertException(
+            String.format("Cannot assign non-existant Ticket: %d", ticketId),
+            "ticket",
+            "ticketnotfound"
+        );
+
+        //check if the agent exists
+        Optional<AgentDTO> optionalAgentDTO = agentService.findOne(agentId);
+        if (optionalAgentDTO.isEmpty()) throw new BadRequestAlertException(
+            String.format("Cannot assign Ticket: %d to non-existant Agent: %d", ticketId, agentId),
+            "agent",
+            "agentnotfound"
+        );
+
+        //check if the ticket is not already assigned
+        TicketDTO ticketDTO = optionalTicketDTO.get();
+        if (!ticketDTO.getStatus().equals(TicketStatus.RECEIVED)) throw new BadRequestAlertException(
+            String.format(
+                "Cannot assign Ticket: %d to Agent: %d, it is already assigned to Agent: %d or closed",
+                ticketId,
+                agentId,
+                ticketDTO.getAssignedTo().getId()
+            ),
+            "ticket",
+            "ticketalreadyassigned"
+        );
+
+        //Now we just define what this function should do in a perfect scenario
+        ticketDTO.setAssignedTo(optionalAgentDTO.get());
+        ticketDTO.setStatus(TicketStatus.BEING_TREATED);
+        Ticket ticket = ticketMapper.toEntity(ticketDTO);
+        return ticketMapper.toDto(ticketRepository.save(ticket));
+    }
+
+    @Override
     public Boolean isClientTurn(Long ticketId) {
         //check if the ticket exists
         Optional<TicketDTO> optionalTicketDTO = findOne(ticketId);
