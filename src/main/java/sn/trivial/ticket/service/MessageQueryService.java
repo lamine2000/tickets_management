@@ -163,4 +163,22 @@ public class MessageQueryService extends QueryService<Message> {
 
         return messageRepository.findAll(specification).stream().map(messageMapper::toDto).collect(Collectors.toList());
     }
+
+    public List<MessageDTO> findByCriteriaAndTicketId(Long ticketId) {
+        log.debug("find by ticket Id: {}", ticketId);
+        MessageCriteria criteria = new MessageCriteria();
+        LongFilter ticketIdFilter = new LongFilter();
+        ticketIdFilter.setEquals(ticketId);
+        criteria.setTicketId(ticketIdFilter);
+
+        final Specification<Message> specification = createSpecification(criteria);
+
+        Optional<TicketDTO> optionalTicketDTO = ticketService.findOne(ticketId);
+
+        if (optionalTicketDTO.isEmpty()) {
+            throw new BadRequestAlertException("Ticket not found", "message", "notAllowed");
+        }
+
+        return messageRepository.findAll(specification).stream().map(messageMapper::toDto).collect(Collectors.toList());
+    }
 }

@@ -229,4 +229,18 @@ public class MessageResource {
         List<MessageDTO> result = messageQueryService.findByCriteriaAndTicketIdForAgent(id);
         return ResponseEntity.ok().body(result);
     }
+
+    /**
+     * {@code POST  /messages/tickets/{id}/admin} : Get all messages of the "id" ticket in chronological order.
+     *
+     * @param id the id of the ticket.
+     * @return the {@link ResponseEntity} with status {@code 200 (OK)} and the list of messages in body.
+     */
+    @GetMapping("/messages/tickets/{id}/admin")
+    public ResponseEntity<List<MessageDTO>> getDiscussionOfOneTicket(@PathVariable Long id) {
+        log.debug("REST request to get all messages of one ticket in chronological order");
+
+        List<MessageDTO> result = messageQueryService.findByCriteriaAndTicketId(id);
+        return ResponseEntity.ok().body(result);
+    }
 }

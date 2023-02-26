@@ -98,6 +98,7 @@ public class SecurityConfiguration {
 
             .regexMatchers("/api/messages/tickets/\\d+/clients").hasAuthority(AuthoritiesConstants.CLIENT)
             .regexMatchers("/api/messages/tickets/\\d+/agents").hasAuthority(AuthoritiesConstants.AGENT)
+            .regexMatchers("/api/messages/tickets/\\d+/admin").hasAuthority(AuthoritiesConstants.ADMIN)
 
             .antMatchers("/api/clients/register").permitAll()
             /***********END CUSTOM***********/

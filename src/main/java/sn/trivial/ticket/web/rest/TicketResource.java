@@ -380,6 +380,14 @@ public class TicketResource {
     }
 
     //assign ticket to an agent
+    /**
+     * {@code POST  /tickets/{ticketId}/admin/assign-agent/{agentId} : Assign a ticket to an agent.
+     *
+     * @param ticketId the ticket id.
+     * @param agentId the agent id.
+     * @return the {@link ResponseEntity} with status {@code 201 (Created)} and with body the new ticketDTO, or with status {@code 400 (Bad Request)}.
+     * @throws URISyntaxException if the Location URI syntax is incorrect.
+     */
     @GetMapping("/tickets/{ticketId}/admin/assign-agent/{agentId}")
     public ResponseEntity<TicketDTO> assignTicketToAgent(@PathVariable Long ticketId, @PathVariable Long agentId)
         throws URISyntaxException {
