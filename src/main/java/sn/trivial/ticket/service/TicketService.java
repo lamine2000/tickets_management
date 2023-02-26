@@ -175,9 +175,28 @@ public interface TicketService {
      */
     Optional<TicketDTO> findSpecificAssignedToConnectedAgent(Long ticketId);
 
+    /**
+     * Create a new message linked to a ticket assigned to the connected agent.
+     *
+     * @param messageContentAndNewTicketStatusVM the ticket id and message content of the message to create.
+     * @return the persisted entity.
+     */
     MessageDTO sendMessageByConnectedAgent(MessageContentAndNewTicketStatusVM messageContentAndNewTicketStatusVM);
 
+    /**
+     * Tells if the "ticketId" ticket is assigned to the connected agent.
+     *
+     * @param ticketId the tickets's id.
+     * @return true if the ticket is assigned to the connected agent or else, false.
+     */
     Boolean isAssignedToConnectedUser(Long ticketId);
 
+    /**
+     * Assign a ticket to an agent.
+     *
+     * @param ticketId the id of the ticket.
+     * @param agentId the id of the agent.
+     * @return the entity.
+     */
     TicketDTO assignTicketToAgent(Long ticketId, Long agentId);
 }

@@ -130,7 +130,7 @@ public class ClientServiceImpl implements ClientService {
         adminUserDTO.setEmail(clientDTO.getEmail());
         adminUserDTO.setLogin(userDTO.getLogin());
         adminUserDTO.setCreatedDate(Instant.now());
-        adminUserDTO.setAuthorities(Set.of("ROLE_CLIENT", "ROLE_USER"));
+        adminUserDTO.setAuthorities(Set.of(AuthoritiesConstants.USER, AuthoritiesConstants.CLIENT));
         adminUserDTO.setLangKey("fr");
 
         User newUser = userService.createUser(adminUserDTO);
