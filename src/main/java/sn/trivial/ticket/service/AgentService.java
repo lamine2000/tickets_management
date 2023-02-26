@@ -71,4 +71,12 @@ public interface AgentService {
      * @return the entity.
      */
     Optional<AgentDTO> findByUser_Login(String login);
+
+    /**
+     * Register a new agent.
+     *
+     * @param agentDTO the entity to save.
+     * @return the persisted entity.
+     */
+    AgentDTO register(AgentDTO agentDTO);
 }

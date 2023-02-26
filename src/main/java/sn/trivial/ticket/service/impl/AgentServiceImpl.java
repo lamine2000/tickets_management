@@ -1,6 +1,8 @@
 package sn.trivial.ticket.service.impl;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -8,10 +10,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sn.trivial.ticket.domain.Agent;
+import sn.trivial.ticket.domain.User;
 import sn.trivial.ticket.repository.AgentRepository;
+import sn.trivial.ticket.security.AuthoritiesConstants;
 import sn.trivial.ticket.service.AgentService;
+import sn.trivial.ticket.service.MailService;
+import sn.trivial.ticket.service.UserService;
+import sn.trivial.ticket.service.dto.AdminUserDTO;
 import sn.trivial.ticket.service.dto.AgentDTO;
+import sn.trivial.ticket.service.dto.UserDTO;
 import sn.trivial.ticket.service.mapper.AgentMapper;
+import sn.trivial.ticket.service.mapper.UserMapper;
 
 /**
  * Service Implementation for managing {@link Agent}.
@@ -26,9 +35,24 @@ public class AgentServiceImpl implements AgentService {
 
     private final AgentMapper agentMapper;
 
-    public AgentServiceImpl(AgentRepository agentRepository, AgentMapper agentMapper) {
+    private final UserService userService;
+
+    private final MailService mailService;
+
+    private final UserMapper userMapper;
+
+    public AgentServiceImpl(
+        AgentRepository agentRepository,
+        AgentMapper agentMapper,
+        UserService userService,
+        MailService mailService,
+        UserMapper userMapper
+    ) {
         this.agentRepository = agentRepository;
         this.agentMapper = agentMapper;
+        this.userService = userService;
+        this.mailService = mailService;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -90,5 +114,26 @@ public class AgentServiceImpl implements AgentService {
     public Optional<AgentDTO> findByUser_Login(String login) {
         log.debug("Request to get Agent of login: {}", login);
         return agentRepository.findByUser_Login(login).map(agentMapper::toDto);
+    }
+
+    @Override
+    public AgentDTO register(AgentDTO agentDTO) {
+        log.debug("Request to register Client : {}", agentDTO);
+
+        //save the user and then save the client
+        AdminUserDTO adminUserDTO = new AdminUserDTO();
+        UserDTO userDTO = agentDTO.getUser();
+        adminUserDTO.setFirstName(agentDTO.getFirstName());
+        adminUserDTO.setLastName(agentDTO.getLastName());
+        adminUserDTO.setEmail(agentDTO.getEmail());
+        adminUserDTO.setLogin(userDTO.getLogin());
+        adminUserDTO.setCreatedDate(Instant.now());
+        adminUserDTO.setAuthorities(Set.of(AuthoritiesConstants.USER, AuthoritiesConstants.AGENT));
+        adminUserDTO.setLangKey("fr");
+
+        User newUser = userService.createUser(adminUserDTO);
+        mailService.sendCreationEmail(newUser);
+        agentDTO.setUser(userMapper.toDtoLogin(newUser));
+        return save(agentDTO);
     }
 }

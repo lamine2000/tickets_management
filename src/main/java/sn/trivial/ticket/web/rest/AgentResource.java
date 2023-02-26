@@ -200,4 +200,18 @@ public class AgentResource {
             .headers(HeaderUtil.createEntityDeletionAlert(applicationName, true, ENTITY_NAME, id.toString()))
             .build();
     }
+
+    /*CUSTOM*/
+    @PostMapping("/agents/register")
+    public ResponseEntity<AgentDTO> registerAgent(@Valid @RequestBody AgentDTO agentDTO) throws URISyntaxException {
+        log.debug("REST request to save agent : {}", agentDTO);
+        if (agentDTO.getId() != null) {
+            throw new BadRequestAlertException("A new client cannot already have an ID", ENTITY_NAME, "idexists");
+        }
+        AgentDTO result = agentService.register(agentDTO);
+        return ResponseEntity
+            .created(new URI("/api/agents/" + result.getId()))
+            .headers(HeaderUtil.createEntityCreationAlert(applicationName, true, ENTITY_NAME, result.getId().toString()))
+            .body(result);
+    }
 }

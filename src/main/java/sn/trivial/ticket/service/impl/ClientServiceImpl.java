@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sn.trivial.ticket.domain.Client;
 import sn.trivial.ticket.domain.User;
 import sn.trivial.ticket.repository.ClientRepository;
+import sn.trivial.ticket.security.AuthoritiesConstants;
 import sn.trivial.ticket.service.ClientService;
 import sn.trivial.ticket.service.MailService;
 import sn.trivial.ticket.service.UserService;
