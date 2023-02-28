@@ -1,0 +1,11 @@
+name: Notify_jenkins
+on: [workflow_call]
+
+jobs:
+  curl:
+    runs-on: ubuntu-latest
+    steps:
+    - name: curl
+      uses: wei/curl@v1
+      with:
+        args: -X POST "http://207.180.198.161:8080" -d 'from lamine'
