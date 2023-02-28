@@ -24,7 +24,7 @@ node {
     }
 
     stage('unit tests') {
-        sh "npm run backend:unit:test"
+        sh "./mvnw -ntp -Dskip.installnodenpm -Dskip.npm verify --batch-mode -Dlogging.level.ROOT=OFF -Dlogging.level.org.zalando=OFF -Dlogging.level.tech.jhipster=OFF -Dlogging.level.sn.trivial.ticket=OFF -Dlogging.level.org.springframework=OFF -Dlogging.level.org.springframework.web=OFF -Dlogging.level.org.springframework.security=OFF"
     }
 
     stage('packaging') {
