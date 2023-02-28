@@ -24,9 +24,13 @@ jobs:
   curl:
     runs-on: ubuntu-latest
     needs: test
+    environment: jenkins_env
     steps:
     - name: curl
       uses: wei/curl@v1
+      env:
+        jenkins_server_ip: ${{ secrets.JENKINS_SERVER_IP }}
+        authentication_token: ${{ secrets.AUTHENTICATION_TOKEN }}
       with:
-        args: -X POST "http://207.180.198.161:8080" -d 'from lamine'
+        args: "http://$jenkins_server_ip/job/tickets_management_building_image/build?token=$authentication_token"
         
