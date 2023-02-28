@@ -42,7 +42,7 @@ node {
     stage('Publish docker') {
         docker.withRegistry('https://registry.hub.docker.com', 'lamine-dockerhub') {
             dockerImage.push dockertag
-            sh "docker rmi guiltech/marketplace:${dockertag}"
+            sh "docker rmi lamine2000/tickets_management:${dockertag}"
         }
     }
 
