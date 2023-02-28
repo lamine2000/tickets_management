@@ -23,6 +23,10 @@ node {
         sh "./mvnw clean"
     }
 
+    stage('unit tests') {
+        sh "npm run backend:unit:test"
+    }
+
     stage('packaging') {
         sh "./mvnw verify -Pprod -DskipTests"
         archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
