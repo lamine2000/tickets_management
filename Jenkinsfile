@@ -35,14 +35,14 @@ node {
         sh "ls"
         //build docker image
         //sh "docker image build -t custom-jenkins-docker ./target/docker/"
-        dockerImage = docker.build("lamine2000/tickets_management:${dockertag}", 'target/docker')
+        dockerImage = docker.build("localhost:5000/tickets_management", 'target/docker')
     }
 
 
     stage('Publish docker') {
-        docker.withRegistry('https://registry.hub.docker.com', 'lamine-dockerhub') {
+        docker.withRegistry('http://localhost:5000', 'lamine-dockerhub') {
             dockerImage.push dockertag
-            sh "docker rmi lamine2000/tickets_management:${dockertag}"
+            sh "docker rmi localhost:5000/tickets_management"
         }
     }
 
