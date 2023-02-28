@@ -241,6 +241,7 @@ public class TicketServiceImpl implements TicketService {
         );
 
         //Now we just define what this function should do in a perfect scenario
+        //test workflow
         TicketDTO ticketDTO = optionalTicketDTO.get();
         ticketDTO.setStatus(newStatus);
         Ticket ticket = ticketMapper.toEntity(ticketDTO);
