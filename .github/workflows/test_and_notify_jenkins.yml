@@ -1,19 +1,10 @@
-# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
 name: Unit_tests
 
 on: [workflow_call]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
     steps:
     - name: Step 1 - Checkout main branch from GitHub
       uses: actions/checkout@v3
@@ -25,3 +16,13 @@ jobs:
         cache: maven
     - name: Step 3 - Run Unit Tests
       run: mvn -ntp -Dskip.installnodenpm -Dskip.npm verify --batch-mode -Dlogging.level.ROOT=OFF -Dlogging.level.org.zalando=OFF -Dlogging.level.tech.jhipster=OFF -Dlogging.level.sn.trivial.ticket=OFF -Dlogging.level.org.springframework=OFF -Dlogging.level.org.springframework.web=OFF -Dlogging.level.org.springframework.security=OFF
+
+  curl:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+    - name: curl
+      uses: wei/curl@v1
+      with:
+        args: -X POST "http://207.180.198.161:8080" -d 'from lamine'
+        
