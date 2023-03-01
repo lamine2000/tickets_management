@@ -27,11 +27,18 @@ jobs:
     environment: jenkins_env
     steps:
     - name: curl
-      uses: wei/curl@v1
+      uses: indiesdev/curl@v1.1
       env:
         jenkins_server_ip: ${{ secrets.JENKINS_SERVER_IP }}
         authentication_token: ${{ secrets.AUTHENTICATION_TOKEN }}
         jenkins_server_auth: ${{ secrets.JENKINS_SERVER_AUTH }}
       with:
-        args: -H "Authorization:Basic $jenkins_server_auth" "http://$jenkins_server_ip/job/tickets_management_building_image/build?token=$authentication_token"
-        
+          url: "http://$jenkins_server_ip/job/tickets_management_building_image/build"
+          method: "GET"
+          accept: 200,201,204
+          #headers: '{ "Authorization": "Basic $jenkins_server_auth" }'
+          params: '{ "token": "$authentication_token"}'
+          timeout: 1000
+          basic-auth-token: "$jenkins_server_auth"
+          log-response: false
+          retries: 3        
