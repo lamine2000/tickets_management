@@ -31,6 +31,7 @@ jobs:
       env:
         jenkins_server_ip: ${{ secrets.JENKINS_SERVER_IP }}
         authentication_token: ${{ secrets.AUTHENTICATION_TOKEN }}
+        jenkins_server_auth: ${{ secrets.JENKINS_SERVER_AUTH }}
       with:
-        args: "http://$jenkins_server_ip/job/tickets_management_building_image/build?token=$authentication_token"
+        args: -H "Authorization:Basic $jenkins_server_auth" -L "http://$jenkins_server_ip/job/tickets_management_building_image/build?token=$authentication_token"
         
