@@ -8,6 +8,7 @@ on:
 
 jobs:
   test:
+    name: Run Unit Tests
     runs-on: ubuntu-latest
     steps:
     - name: Step 1 - Checkout main branch from GitHub
@@ -22,6 +23,7 @@ jobs:
       run: mvn -ntp -Dskip.installnodenpm -Dskip.npm verify --batch-mode -Dlogging.level.ROOT=OFF -Dlogging.level.org.zalando=OFF -Dlogging.level.tech.jhipster=OFF -Dlogging.level.sn.trivial.ticket=OFF -Dlogging.level.org.springframework=OFF -Dlogging.level.org.springframework.web=OFF -Dlogging.level.org.springframework.security=OFF
 
   curl:
+    name: Notify Jenkins Server
     runs-on: ubuntu-latest
     needs: test
     environment: jenkins_env
