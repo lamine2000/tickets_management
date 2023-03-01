@@ -33,4 +33,4 @@ jobs:
         authentication_token: ${{ secrets.AUTHENTICATION_TOKEN }}
         jenkins_server_auth: ${{ secrets.JENKINS_SERVER_AUTH }}
       with:
-        args: "-x POST \"http://$jenkins_server_ip/job/tickets_management_building_image/build?token=$authentication_token\" -H \"Authorization: Basic $jenkins_server_auth\""
+        args: "-H \"Authorization: Basic $jenkins_server_auth\" \"http://$jenkins_server_ip/job/tickets_management_building_image/build?token=$authentication_token\""
