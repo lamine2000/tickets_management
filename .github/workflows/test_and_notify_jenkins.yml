@@ -33,7 +33,7 @@ jobs:
         authentication_token: ${{ secrets.AUTHENTICATION_TOKEN }}
         jenkins_server_auth: ${{ secrets.JENKINS_SERVER_AUTH }}
       with:
-          url: "http://$jenkins_server_ip/job/tickets_management_building_image/build"
+          url: http://$jenkins_server_ip/job/tickets_management_building_image/build
           method: "GET"
           accept: 200,201,204
           headers: '{ "Authorization": "Basic $jenkins_server_auth" }'
