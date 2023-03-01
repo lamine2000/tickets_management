@@ -2,8 +2,7 @@ version: '2.2'
 services:
     db-postgresql:
         image: postgres:12.3
-        #volumes:
-        #- ./env-volatile/postgresql/:/var/lib/postgresql/data/
+    
         environment:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
