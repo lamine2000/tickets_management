@@ -48,8 +48,6 @@ node {
 
     stage('Deploy with ansible') {
         sh "cd deply/"
-        sh "ls /usr/bin"
-        sh "ls /usr/bin/ansible-playbook"
-        sh "ansible-playbook -i inventory.yml playbook.yml"
+        ansiblePlaybook disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'
     }
 }
