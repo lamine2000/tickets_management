@@ -31,8 +31,8 @@ node {
     stage('build docker') {
         sh "cp -R src/main/docker target/"
         sh "cp target/*.war target/docker/"
-        sh "pwd"
-        sh "ls"
+        //sh "pwd"
+        //sh "ls"
         //build docker image
         //sh "docker image build -t custom-jenkins-docker ./target/docker/"
         dockerImage = docker.build("localhost:5000/tickets_management:${dockertag}", 'target/docker')
@@ -46,4 +46,9 @@ node {
         }
     }
 
+    stage('Deploy with ansible') {
+        sh "cd deply/"
+        sh "mkdir -p env-volatile/postgresql/"
+        sh "ansible-playbook -i inventory.yml playbook.yml"
+    }
 }
