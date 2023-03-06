@@ -48,7 +48,8 @@ node {
 
     stage('Deploy with ansible') {
         sh "cd deply/"
-        sh "mkdir -p env-volatile/postgresql/"
+        sh "ls /usr/bin"
+        sh "ls /usr/bin/ansible-playbook"
         sh "ansible-playbook -i inventory.yml playbook.yml"
     }
 }
