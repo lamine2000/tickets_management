@@ -1,6 +1,9 @@
 ---
 - hosts: localhost
   tasks:
+    - name: Stop Prevous Runs
+      command: docker-compose stop
+    
     - name: Start Docker Compose
       command: docker-compose up -d
       args:
