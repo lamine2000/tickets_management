@@ -53,7 +53,7 @@ node {
         //sh "cat /etc/passwd"
         //ansiblePlaybook become: true, disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/playbook.yml'
         //sh "ansible-playbook -i deply/inventory.yml deply/playbook.yml"
-        ansiblePlaybook installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'
+        ansiblePlaybook installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/playbook.yml'
         //ansiblePlaybook disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'
     }
 }
