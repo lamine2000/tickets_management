@@ -52,5 +52,6 @@ node {
         //sh "find / -type f -name ansible-playbook"
         ansiblePlaybook become: true, credentialsId: 'ssh-local', disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/playbook.yml'
         //ansiblePlaybook installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/playbook.yml'
-        //ansiblePlaybook disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'    }
+        //ansiblePlaybook disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'
+    }
 }
