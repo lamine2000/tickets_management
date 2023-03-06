@@ -23,7 +23,7 @@ node {
         sh "./mvnw clean"
     }
 
-    stage('packaging') {
+    /*stage('packaging') {
         sh "./mvnw verify -Pprod -DskipTests"
         archiveArtifacts artifacts: '**/target/*.war', fingerprint: true
     }
@@ -44,7 +44,7 @@ node {
             dockerImage.push dockertag
             sh "docker rmi localhost:5000/tickets_management:${dockertag}"
         }
-    }
+    }*/
 
     stage('Deploy with ansible') {
         sh "cd deply/"
