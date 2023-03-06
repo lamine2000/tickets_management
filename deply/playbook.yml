@@ -1,23 +1,23 @@
 ---
 - hosts: localhost
-become: yes
-tasks:
-  - name: Install Docker
-    apt:
-      name: docker.io
-      state: present
+  become: yes
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
 
-  - name: Install Docker Compose
-    pip:
-      name: docker-compose
-      state: present
+    - name: Install Docker Compose
+      pip:
+        name: docker-compose
+        state: present
 
-  - name: Copy Docker Compose file
-    copy:
-      src: docker-compose.yml
-      dest: /opt/tickets_management/docker-compose.yml
+    - name: Copy Docker Compose file
+      copy:
+        src: docker-compose.yml
+        dest: /opt/tickets_management/docker-compose.yml
 
-  - name: Start Docker Compose
-    command: docker-compose up -d
-    args:
-      chdir: /opt/tickets_management
+    - name: Start Docker Compose
+      command: docker-compose up -d
+      args:
+        chdir: /opt/tickets_management
