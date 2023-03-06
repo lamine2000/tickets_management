@@ -50,5 +50,7 @@ node {
         sh "cd deply/"
         sh "ls /usr/local/bin/"
         sh "find / -type f -name ansible-playbook"
+        sh "apt update"
+        sh "apt install ansible"
         ansiblePlaybook become: true, becomeUser: 'lamine', installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'    }
 }
