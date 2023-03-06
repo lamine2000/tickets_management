@@ -47,13 +47,12 @@ node {
     }
 
     stage('Deploy with ansible') {
-        sh "cd deply/"
         //sh "ls /usr/local/bin/"
         //sh "find / -type f -name ansible-playbook"
         sh "whoami"
         sh "cat /etc/passwd"
         //ansiblePlaybook become: true, disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/playbook.yml'
-        sh "ansible-playbook -i inventory.yml playbook.yml"
+        sh "ansible-playbook -i deply/inventory.yml deply/playbook.yml"
         //ansiblePlaybook installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/playbook.yml'
         //ansiblePlaybook disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'
     }
