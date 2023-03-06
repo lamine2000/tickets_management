@@ -48,5 +48,6 @@ node {
 
     stage('Deploy with ansible') {
         sh "cd deply/"
+        sh "ls /usr/local/bin/"
         ansiblePlaybook become: true, becomeUser: 'lamine', installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'    }
 }
