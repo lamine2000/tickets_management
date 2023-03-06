@@ -48,6 +48,5 @@ node {
 
     stage('Deploy with ansible') {
         sh "cd deply/"
-        ansiblePlaybook disableHostKeyChecking: true, installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'
-    }
+        ansiblePlaybook become: true, becomeUser: 'lamine', installation: 'ansible', inventory: 'deply/inventory', playbook: 'deply/docker-compose.yml'    }
 }
