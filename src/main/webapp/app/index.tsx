@@ -26,6 +26,7 @@ const render = Component =>
   root.render(
     <ErrorBoundary>
       <Provider store={store}>
+        <div>Small change</div>
         <div>
           <Component />
         </div>
