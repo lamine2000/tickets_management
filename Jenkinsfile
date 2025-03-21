@@ -7,6 +7,7 @@ node {
 
     stage('check java') {
         sh "java -version"
+        sh "echo 'hello guys'"
     }
 
     def dockertag = 'latest'
